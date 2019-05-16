@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view;
+package mlp;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -22,7 +22,7 @@ import javafx.scene.layout.AnchorPane;
  *
  * @author Thiago
  */
-public class TelaPrincipalController implements Initializable {
+public class TreinamentoController implements Initializable {
 
     @FXML
     private AnchorPane pnArquivo;
@@ -34,6 +34,8 @@ public class TelaPrincipalController implements Initializable {
     private AnchorPane pnCriterioParada;
     @FXML
     private RadioButton rdErro;
+    @FXML
+    private ToggleGroup grupoCriterioParada;
     @FXML
     private RadioButton rdIteracao;
     @FXML
@@ -47,15 +49,13 @@ public class TelaPrincipalController implements Initializable {
     @FXML
     private RadioButton rdLinear;
     @FXML
+    private ToggleGroup grupoFuncaoAtivacao;
+    @FXML
     private RadioButton rdLogistica;
     @FXML
     private RadioButton rdHiperbolica;
     @FXML
     private Button btnTreinar;
-    @FXML
-    private ToggleGroup grupoCriterioParada;
-    @FXML
-    private ToggleGroup grupoFuncaoAtivacao;
     @FXML
     private ProgressBar progressoTreinamento;
 

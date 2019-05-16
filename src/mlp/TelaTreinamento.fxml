@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="352.0" prefWidth="762.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="view.TelaPrincipalController">
+<AnchorPane id="AnchorPane" prefHeight="352.0" prefWidth="762.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mlp.TreinamentoController">
    <children>
       <Label layoutX="243.0" layoutY="14.0" text="Rede Neural MLP">
          <font>
@@ -36,7 +36,8 @@
             <RadioButton fx:id="rdErro" layoutX="14.0" layoutY="31.0" mnemonicParsing="false" text="Por Erro">
                <toggleGroup>
                   <ToggleGroup fx:id="grupoCriterioParada" />
-               </toggleGroup></RadioButton>
+               </toggleGroup>
+            </RadioButton>
             <RadioButton fx:id="rdIteracao" layoutX="14.0" layoutY="54.0" mnemonicParsing="false" text="Por Iteração" toggleGroup="$grupoCriterioParada" />
             <TextField fx:id="txtCriterioParada" layoutX="14.0" layoutY="79.0" prefHeight="3.0" prefWidth="85.0" />
          </children>
@@ -61,7 +62,8 @@
             <RadioButton fx:id="rdLinear" layoutX="14.0" layoutY="29.0" mnemonicParsing="false" text="Linear">
                <toggleGroup>
                   <ToggleGroup fx:id="grupoFuncaoAtivacao" />
-               </toggleGroup></RadioButton>
+               </toggleGroup>
+            </RadioButton>
             <RadioButton fx:id="rdLogistica" layoutX="14.0" layoutY="56.0" mnemonicParsing="false" text="Logística" toggleGroup="$grupoFuncaoAtivacao" />
             <RadioButton fx:id="rdHiperbolica" layoutX="14.0" layoutY="83.0" mnemonicParsing="false" text="Hiperbólica" toggleGroup="$grupoFuncaoAtivacao" />
          </children>
