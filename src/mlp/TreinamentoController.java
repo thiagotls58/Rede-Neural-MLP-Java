@@ -74,7 +74,12 @@ public class TreinamentoController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
     }    
-
+    
+    /**
+     * Este método permite ao usuário selecionar o arquivo do tipo CSV para
+     * efetuar o treinamento da rede neural.
+     * @param event 
+     */
     @FXML
     private void clkBtnProcurar(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -87,6 +92,10 @@ public class TreinamentoController implements Initializable {
         txtCaminhoArquivo.setText(caminho);
     }
 
+    /**
+     * Este método inicia a rede neural e faz o treinamento da mesma.
+     * @param event 
+     */
     @FXML
     private void clkBtnTreinar(MouseEvent event) {
         
@@ -103,6 +112,8 @@ public class TreinamentoController implements Initializable {
                 converterSaida(new ArrayList(dadosArquivo), nEntrada);
         
         RedeNeural mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta);
+        
+        mlp.treinar(dadosTreinamento, saidaEsperada);
         
     }
     
