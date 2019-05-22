@@ -13,7 +13,15 @@ import java.util.List;
  */
 public class Arquivo {
 
-    public List<String> obterDados(String arquivoCSV) {
+    /**
+     * Este método faz a leitura do arquivo CSV selecionado, em seguida separa os 
+     * dados de cada linha do arquivo em um vetor de String, e insere este vetor no 
+     * Array para ser retornado.
+     * 
+     * @param arquivoCSV - Caminho do arquivo CSV selecionado
+     * @return ArrayList<String[]> - Array que contém um vetor de String
+     */
+    public ArrayList<String[]> obterDados(String arquivoCSV) {
 
         BufferedReader br = null;
         String linha = "";
@@ -32,8 +40,10 @@ public class Arquivo {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            dados = null;
         } catch (IOException e) {
             e.printStackTrace();
+            dados = null;
         } finally {
             if (br != null) {
                 try {

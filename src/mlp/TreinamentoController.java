@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
@@ -61,11 +63,11 @@ public class TreinamentoController implements Initializable {
     @FXML
     private Button btnTreinar;
     @FXML
-    private ProgressBar progressoTreinamento;
-    @FXML
     private TextField txtAtributos;
     @FXML
     private TextField txtClasses;
+    @FXML
+    private TextArea txtSaidas;
 
     /**
      * Initializes the controller class.
@@ -73,48 +75,76 @@ public class TreinamentoController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
-    
+
+    }
+
     /**
      * Este método permite ao usuário selecionar o arquivo do tipo CSV para
      * efetuar o treinamento da rede neural.
-     * @param event 
+     *
+     * @param event
      */
     @FXML
     private void clkBtnProcurar(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.
-                ExtensionFilter("CSV files", "*.csv");
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files", "*.csv");
         fileChooser.getExtensionFilters().add(extFilter);
 
         File file = fileChooser.showOpenDialog(null);
         String caminho = file.getAbsolutePath();
         txtCaminhoArquivo.setText(caminho);
+
     }
 
     /**
      * Este método inicia a rede neural e faz o treinamento da mesma.
-     * @param event 
+     *
+     * @param event
      */
     @FXML
     private void clkBtnTreinar(MouseEvent event) {
-        
-        String caminhoArquivo = txtCaminhoArquivo.getText();
-        int nEntrada = Integer.parseInt(txtAtributos.getText());
-        int nSaida = Integer.parseInt(txtClasses.getText());
-        int nCamadaOculta = (nEntrada + nSaida) / 2;
-        double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
-        
-        List<String> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
-        double[][] dadosTreinamento = new Util().
-                converterEntrada(new ArrayList(dadosArquivo), nEntrada);
-        double[] saidaEsperada = new Util().
-                converterSaida(new ArrayList(dadosArquivo), nEntrada);
-        
-        RedeNeural mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta);
-        
-        mlp.treinar(dadosTreinamento, saidaEsperada);
-        
+
+        if (validarDados()) {
+
+            int nEntrada = Integer.parseInt(txtAtributos.getText());
+            int nSaida = Integer.parseInt(txtClasses.getText());
+            int nCamadaOculta = (nEntrada + nSaida) / 2;
+            double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
+
+            RedeNeural mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta, nSaida);
+
+            String caminhoArquivo = txtCaminhoArquivo.getText();
+            ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
+            ArrayList<double[][]> dadosConvertidos = new Util()
+                    .converterDados(dadosArquivo, nEntrada, nSaida);
+            double[][] matrizAmostras = dadosConvertidos.get(0);
+            double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
+
+            mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
+
+            if (rdErro.isSelected()) {
+                double limiteErro = Double.parseDouble(txtCriterioParada.getText());
+                mlp.setLimiteErro(limiteErro);
+            } else {
+                int limiteEpocas = Integer.parseInt(txtCriterioParada.getText());
+                mlp.setLimiteEpocas(limiteEpocas);
+            }
+            
+            if (rdLinear.isSelected()) {
+                mlp.setFuncaoAtivacao(FuncaoAtivacao.LINEAR);
+            } else if (rdLogistica.isSelected()) {
+                mlp.setFuncaoAtivacao(FuncaoAtivacao.LOGISTICA);
+            } else {
+                mlp.setFuncaoAtivacao(FuncaoAtivacao.HIPERBOLICA);
+            }
+            
+            mlp.treinar();
+        }
+
     }
-    
+
+    private boolean validarDados() {
+        return true;
+    }
+
 }
