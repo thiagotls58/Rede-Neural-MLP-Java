@@ -6,7 +6,10 @@
 package mlp;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -73,6 +76,11 @@ public class RedeNeural {
      * vetor de entradas para calcular a rede
      */
     private double[] vetEntradas;
+    
+    /**
+     * List da sequência que as amostras serão calculadas
+     */
+    private List<Integer> listSequencia;
 
     /**
      * vetor de saídas da rede
@@ -119,6 +127,7 @@ public class RedeNeural {
         this.nmrNeuroniosSaida = nmrSaidas;
         this.inicializarPesos();
         this.inicializarCamadaOculta();
+        this.inicializarCamadaSaida();
     }
 
     /**
@@ -369,6 +378,7 @@ public class RedeNeural {
         verificarErroDaRede();
         erroMedioDaRede = 10.0;
         int epocas = 0;
+        int index;
 
         vetEntradas = new double[nmrEntrada];
         vetSaidas = new double[nmrNeuroniosSaida];
@@ -381,12 +391,14 @@ public class RedeNeural {
                 erroDaRede = 0.0;
                 erroMedioDaRede = 0.0;
                 epocas++;
+                SortearSequencia();
                 //Percorrer todo o conjunto de amostras
-                for (int i = 1; i < amostrasTreinamento.length; i++) {
+                for (int i = 0; i < amostrasTreinamento.length; i++) {
 
-                    System.arraycopy(amostrasTreinamento[i], 0, vetEntradas, 0,
-                            amostrasTreinamento[i].length); // copiamos os dados de entrada para o vetor entradas
-                    System.arraycopy(saidaEsperada[i], 0, vetSaidas, 0, saidaEsperada[i].length); //copiamos os dados de resultado esperado para eO
+                    index = listSequencia.get(i);
+                    System.arraycopy(amostrasTreinamento[index], 0, vetEntradas, 0,
+                            amostrasTreinamento[index].length); // copiamos os dados de entrada para o vetor entradas
+                    System.arraycopy(saidaEsperada[index], 0, vetSaidas, 0, saidaEsperada[index].length); //copiamos os dados de resultado esperado para vetSaidas
 
                     // propagação
                     propagar();
@@ -402,6 +414,10 @@ public class RedeNeural {
                 }
                 calcularErroMedioDaRede();
             }
+            
+            System.out.println("Fim do treinamento...");
+            System.out.println("Erro: " + erroMedioDaRede);
+            System.out.println("Épocas: " + epocas);
         }
     }
 
@@ -587,6 +603,24 @@ public class RedeNeural {
                 novoPeso = pesoAtual + taxaAprendizado * erroGradiente * entrada;
                 pesosCamadaEntrada[i][j] = novoPeso;
             }
+        }
+    }
+
+    /**
+     * Sorteia uma sequência em que as amostras serão calculadas na rede.
+     */
+    private void SortearSequencia() {
+        Random random = new Random();
+        listSequencia = new ArrayList<>();
+        int totalAmostras = amostrasTreinamento.length;
+        int numeroSorteado;
+        
+        for (int i = 0; i < totalAmostras; i++) {
+            numeroSorteado = random.nextInt(totalAmostras);
+            while (listSequencia.contains(numeroSorteado)) {
+                numeroSorteado = random.nextInt(totalAmostras);
+            }
+            listSequencia.add(numeroSorteado);
         }
     }
 
