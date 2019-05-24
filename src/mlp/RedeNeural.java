@@ -322,7 +322,7 @@ public class RedeNeural {
      */
     private void verificarErroDaRede() {
         if (this.limiteErro == 0.0) {
-            this.limiteErro = 0.1;
+            this.limiteErro = 0.0000001;
         }
     }
     
@@ -387,9 +387,8 @@ public class RedeNeural {
             /**
              * Enquanto não atingir o limite de erro, ou o limite de épocas
              */
-            while (erroMedioDaRede > limiteErro && epocas < limiteEpocas) {
+            while ((Math.abs(erroMedioDaRede) > limiteErro) && (epocas < limiteEpocas)) {
                 erroDaRede = 0.0;
-                erroMedioDaRede = 0.0;
                 epocas++;
                 SortearSequencia();
                 //Percorrer todo o conjunto de amostras
@@ -404,17 +403,21 @@ public class RedeNeural {
                     propagar();
                     calcularErroSaida();
                     calcularErroDaRede();
-
-                    if (!atingiuLimiar()) {
-                        // retropropagação
-                        calcularErroCamadaOculta();
-                        atualizarPesosCamadaOculta();
-                        atualizarPesosCamadaEntrada();
-                    }
                 }
+                
                 calcularErroMedioDaRede();
+                if (!atingiuLimiar()) {
+                    // retropropagação
+                    calcularErroCamadaOculta();
+                    atualizarPesosCamadaOculta();
+                    atualizarPesosCamadaEntrada();
+                }
+                
+                System.out.println("Treinando... época: " + epocas + ", erro: " + erroMedioDaRede);
             }
-            
+            System.out.println();
+            System.out.println();
+            System.out.println();
             System.out.println("Fim do treinamento...");
             System.out.println("Erro: " + erroMedioDaRede);
             System.out.println("Épocas: " + epocas);
@@ -435,11 +438,14 @@ public class RedeNeural {
      * Calcula o net de cada neurônio da camada oculta.
      */
     private void calcularNetCamadaOculta() {
-
+        double net;
+        double resultado;
+        
         for (int i = 0; i < nmrNeuroniosOculta; i++) {
-            double net = 0.0;
+            net = 0.0;
             for (int j = 0; j < nmrEntrada; j++) {
-                net += vetEntradas[j] * pesosCamadaEntrada[j][i];
+                resultado = vetEntradas[j] * pesosCamadaEntrada[j][i];
+                net += resultado;
             }
 
             net += bias;
@@ -462,11 +468,14 @@ public class RedeNeural {
      * Calcula o net de cada neurônio da camada de saída.
      */
     private void calcularNetCamadaSaida() {
-
+        double net;
+        double resultado;
+        
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
-            double net = 0.0;
+            net = 0.0;
             for (int j = 0; j < nmrNeuroniosOculta; j++) {
-                net += camadaOculta.get(i).getSaida() * pesosCamadaOculta[j][i];
+                resultado = camadaOculta.get(j).getSaida() * pesosCamadaOculta[j][i];
+                net += resultado;
             }
 
             net += bias;
@@ -514,12 +523,13 @@ public class RedeNeural {
     private void calcularErroDaRede() {
 
         double erro = 0.0;
+        double somatorio = 0.0;
         NeuronioSaida neuronio;
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             neuronio = camadaSaida.get(i);
-            erro += 0.5 * Math.pow(neuronio.getErroSaida(), 2);
+            somatorio += neuronio.getErroSaida();
         }
-
+        erro = 0.5 * (Math.pow(somatorio, 2));
         erroDaRede += erro;
     }
 
@@ -535,7 +545,6 @@ public class RedeNeural {
      * @return boolean - true -> atingiu limiar, false -> não atingiu limiar
      */
     private boolean atingiuLimiar() {
-        calcularErroMedioDaRede();
         if (erroMedioDaRede < limiteErro) {
             return true;
         }
@@ -555,7 +564,7 @@ public class RedeNeural {
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             erroGradienteSaida += camadaSaida.get(i).getErroGradiente();
         }
-        // calcula o erro dos neuronios da camada de saída
+        // calcula o erro dos neuronios da camada oculta
         for (int i = 0; i < nmrNeuroniosOculta; i++) {
             neuronio = camadaOculta.get(i);
             derivada = calcularDerivadaFuncAtivacao(neuronio.getNet());
@@ -623,5 +632,5 @@ public class RedeNeural {
             listSequencia.add(numeroSorteado);
         }
     }
-
+    
 }

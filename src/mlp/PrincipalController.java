@@ -28,7 +28,7 @@ import javafx.stage.FileChooser;
  *
  * @author Thiago
  */
-public class TreinamentoController implements Initializable {
+public class PrincipalController implements Initializable {
 
     @FXML
     private AnchorPane pnArquivo;

@@ -26,7 +26,7 @@ public class MLP extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         
-        Parent root = FXMLLoader.load(getClass().getResource("TelaTreinamento.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("TelaPrincipal.fxml"));
         Scene scene = new Scene(root);
         stage.setTitle("Rede Neural MLP");
         stage.setScene(scene);
