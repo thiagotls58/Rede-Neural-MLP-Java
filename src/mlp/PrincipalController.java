@@ -8,13 +8,10 @@ package mlp;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Cursor;
 import javafx.scene.control.Button;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -139,7 +136,9 @@ public class PrincipalController implements Initializable {
                 mlp.setFuncaoAtivacao(FuncaoAtivacao.HIPERBOLICA);
             }
             
+            txtSaidas.clear();
             mlp.treinar();
+            txtSaidas.appendText(mlp.resultadoTreinamento());
         }
 
     }

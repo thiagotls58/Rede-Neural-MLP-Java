@@ -6,10 +6,8 @@
 package mlp;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 /**
  *
@@ -112,6 +110,11 @@ public class RedeNeural {
      * Deve ser calculado ao fim de cada época
      */
     private double erroMedioDaRede;
+    
+    /**
+     * Número epocas que o treinamento foi realizado
+     */
+    private int totalEpocas;
 
     /**
      * Recebe os parâmetros inicializa os pesos da rede.
@@ -401,26 +404,25 @@ public class RedeNeural {
                     
                     propagar();
                     retropropagar();
-                    calcularErroSaida();
                     calcularErroDaRede();
                 }
                 
                 calcularErroMedioDaRede();
-                if (!atingiuLimiar()) {
-                    // retropropagação
-                    calcularErroCamadaOculta();
-                    atualizarPesosCamadaOculta();
-                    atualizarPesosCamadaEntrada();
-                }
                 
                 System.out.println("Treinando... época: " + epocas + ", erro: " + erroMedioDaRede);
             }
             System.out.println();
             System.out.println();
-            System.out.println();
             System.out.println("Fim do treinamento...");
             System.out.println("Erro: " + erroMedioDaRede);
             System.out.println("Épocas: " + epocas);
+            totalEpocas = epocas;
+            System.out.println();
+            System.out.println("Pesos camada entrada");
+            System.out.println(printarMatriz(pesosCamadaEntrada));
+            System.out.println();
+            System.out.println("Pesos camada saída");
+            System.out.println(printarMatriz(pesosCamadaOculta));
         }
     }
 
@@ -438,7 +440,10 @@ public class RedeNeural {
      * Faz a retropropagação da rede.
      */
     private void retropropagar() {
-        
+        calcularErroSaida();
+        calcularErroCamadaOculta();
+        atualizarPesosCamadaOculta();
+        atualizarPesosCamadaEntrada();
     }
 
     /**
@@ -515,7 +520,7 @@ public class RedeNeural {
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             neuronio = camadaSaida.get(i);
 
-            erroSaida = vetSaidas[i] - neuronio.getSaida();
+            erroSaida = Math.abs(vetSaidas[i] - neuronio.getSaida());
             neuronio.setErroSaida(erroSaida);
 
             net = neuronio.getNet();
@@ -528,34 +533,20 @@ public class RedeNeural {
      * Calcula o erro da rede ao fim de cada amostra passar na rede.
      */
     private void calcularErroDaRede() {
-
-        double erro = 0.0;
         double somatorio = 0.0;
         NeuronioSaida neuronio;
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             neuronio = camadaSaida.get(i);
             somatorio += neuronio.getErroSaida();
         }
-        erro = 0.5 * (Math.pow(somatorio, 2));
-        erroDaRede += erro;
+        erroMedioDaRede = somatorio / amostrasTreinamento.length;
     }
 
     /**
      * Calcula o erro médio da rede, para verificar se atingiu o limiar.
      */
     private void calcularErroMedioDaRede() {
-        erroMedioDaRede = erroDaRede / amostrasTreinamento.length;
-    }
-
-    /**
-     * Verifica se o erro médio da rede atingiu o limiar.
-     * @return boolean - true -> atingiu limiar, false -> não atingiu limiar
-     */
-    private boolean atingiuLimiar() {
-        if (erroMedioDaRede < limiteErro) {
-            return true;
-        }
-        return false;
+        
     }
 
     /**
@@ -611,20 +602,15 @@ public class RedeNeural {
         double pesoAtual;
         double erroGradiente;
         double entrada;
-        
-        for (int e = 0; e < amostrasTreinamento.length; e++) {
-            double[] vetorEntradas = amostrasTreinamento[e];
-            for (int i = 0; i < nmrEntrada; i++) {
-                for (int j = 0; j < nmrNeuroniosOculta; j++) {
-                    pesoAtual = pesosCamadaEntrada[i][j];
-                    erroGradiente = camadaOculta.get(j).getErroGradiente();
-                    entrada = vetorEntradas[i];
-                    novoPeso = pesoAtual + taxaAprendizado * erroGradiente * entrada;
-                    pesosCamadaEntrada[i][j] = novoPeso;
-                }
+        for (int i = 0; i < nmrEntrada; i++) {
+            for (int j = 0; j < nmrNeuroniosOculta; j++) {
+                pesoAtual = pesosCamadaEntrada[i][j];
+                erroGradiente = camadaOculta.get(j).getErroGradiente();
+                entrada = vetEntradas[i];
+                novoPeso = pesoAtual + taxaAprendizado * erroGradiente * entrada;
+                pesosCamadaEntrada[i][j] = novoPeso;
             }
         }
-        
     }
 
     /**
@@ -645,5 +631,44 @@ public class RedeNeural {
         }
     }
 
+    /**
+     * Escrevo no console os dados de uma matriz.
+     * @param matriz double[][] - matriz para printar no console
+     */
+    private String printarMatriz(double[][] matriz) {
+        String str = "";
+        String format = "";
+        for (int i = 0; i < matriz.length; i++) {
+            str += "[";
+            for (int j = 0; j < matriz[0].length; j++){
+                format = String.format("%.2f", matriz[i][j]);
+                if (j == matriz[0].length - 1)
+                    str += format;
+                else
+                    str += format + ", ";
+            }
+            str += "]\n";
+        }
+        return str;
+    }
+    
+    /**
+     * Retorna os resultados do treinamento
+     * @return string - dados do treinamento
+     */
+    public String resultadoTreinamento() {
+        String str = "";
+        str += "Fim do treinamento...\n";
+        str += "Erro da rede: " + erroMedioDaRede + "\n";
+        str += "Número de Épocas: " + totalEpocas + "\n";
+        str += "\n";
+        str += "Pesos camada entrada\n";
+        str += printarMatriz(pesosCamadaEntrada);
+        str += "\n";
+        str += "Pesos camada saída\n";
+        str += printarMatriz(pesosCamadaOculta);
+        
+        return str;
+    }
 
 }

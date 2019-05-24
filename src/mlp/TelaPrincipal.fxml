@@ -86,6 +86,6 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Button>
-      <TextArea fx:id="txtSaidas" layoutX="26.0" layoutY="257.0" prefHeight="63.0" prefWidth="715.0" />
+      <TextArea fx:id="txtSaidas" layoutX="26.0" layoutY="257.0" prefHeight="280.0" prefWidth="715.0" />
    </children>
 </AnchorPane>

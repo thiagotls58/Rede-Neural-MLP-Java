@@ -1,11 +1,10 @@
 package mlp;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
- * @author Tiago
+ * @author Thiago
  */
 public class Util {
 
