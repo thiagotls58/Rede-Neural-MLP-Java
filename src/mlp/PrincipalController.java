@@ -110,17 +110,18 @@ public class PrincipalController implements Initializable {
             int nSaida = Integer.parseInt(txtClasses.getText());
             int nCamadaOculta = (nEntrada + nSaida) / 2;
             double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
+            Util util = new Util();
 
             RedeNeural mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta, nSaida);
 
             String caminhoArquivo = txtCaminhoArquivo.getText();
             ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
-            ArrayList<double[][]> dadosConvertidos = new Util()
-                    .converterDados(dadosArquivo, nEntrada, nSaida);
+            ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
             double[][] matrizAmostras = dadosConvertidos.get(0);
             double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
+            double[][] amostrasNormalizadas = util.normalizarDados(matrizAmostras);
 
-            mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
+            mlp.setDadosTreinamento(amostrasNormalizadas, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
 
             if (rdErro.isSelected()) {
                 double limiteErro = Double.parseDouble(txtCriterioParada.getText());

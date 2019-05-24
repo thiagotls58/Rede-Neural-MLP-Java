@@ -201,23 +201,23 @@ public class RedeNeural {
     }
 
     /**
-     * Função de ativação Logística f(x) = 1 / (1 + exp(-x))
+     * Função de ativação Logística
      *
      * @param x double - net do neurônio da rede
      * @return double - retorna saída do neurônio
      */
     private double funcLogistica(double x) {
-        return 1 / (1 + (double) Math.exp(-x));
+        return (1.0 /(1.0 + Math.exp(-x)));
     }
 
     /**
-     * Calcula a derivada da função logística f'(x) = f(x)(1-f(x))
+     * Calcula a derivada da função logística
      *
      * @param x double - valor de entrada
      * @return double - retorna a derivada da função logística
      */
     private double funcLogisticaDerivada(double x) {
-        return this.funcLogistica(x) * (1 - this.funcLogistica(x));
+        return Math.exp(-x) / Math.pow((1 + Math.exp(-x)),2);
     }
 
     /**
@@ -398,9 +398,9 @@ public class RedeNeural {
                     System.arraycopy(amostrasTreinamento[index], 0, vetEntradas, 0,
                             amostrasTreinamento[index].length); // copiamos os dados de entrada para o vetor entradas
                     System.arraycopy(saidaEsperada[index], 0, vetSaidas, 0, saidaEsperada[index].length); //copiamos os dados de resultado esperado para vetSaidas
-
-                    // propagação
+                    
                     propagar();
+                    retropropagar();
                     calcularErroSaida();
                     calcularErroDaRede();
                 }
@@ -432,6 +432,13 @@ public class RedeNeural {
         calcularSaidaCamadaOculta();
         calcularNetCamadaSaida();
         calcularSaidaCamadaSaida();
+    }
+    
+    /**
+     * Faz a retropropagação da rede.
+     */
+    private void retropropagar() {
+        
     }
 
     /**
@@ -604,15 +611,20 @@ public class RedeNeural {
         double pesoAtual;
         double erroGradiente;
         double entrada;
-        for (int i = 0; i < nmrEntrada; i++) {
-            for (int j = 0; j < nmrNeuroniosOculta; j++) {
-                pesoAtual = pesosCamadaEntrada[i][j];
-                erroGradiente = camadaOculta.get(j).getErroGradiente();
-                entrada = vetEntradas[i];
-                novoPeso = pesoAtual + taxaAprendizado * erroGradiente * entrada;
-                pesosCamadaEntrada[i][j] = novoPeso;
+        
+        for (int e = 0; e < amostrasTreinamento.length; e++) {
+            double[] vetorEntradas = amostrasTreinamento[e];
+            for (int i = 0; i < nmrEntrada; i++) {
+                for (int j = 0; j < nmrNeuroniosOculta; j++) {
+                    pesoAtual = pesosCamadaEntrada[i][j];
+                    erroGradiente = camadaOculta.get(j).getErroGradiente();
+                    entrada = vetorEntradas[i];
+                    novoPeso = pesoAtual + taxaAprendizado * erroGradiente * entrada;
+                    pesosCamadaEntrada[i][j] = novoPeso;
+                }
             }
         }
+        
     }
 
     /**
@@ -632,5 +644,6 @@ public class RedeNeural {
             listSequencia.add(numeroSorteado);
         }
     }
-    
+
+
 }
