@@ -184,23 +184,23 @@ public class RedeNeural {
     }
 
     /**
-     * Função de ativação Linear f(x) = x
+     * Função de ativação Linear f(x) = x/10
      *
      * @param x double - net do neurônio da rede
      * @return double - retorna a saída do neurônio
      */
     private double funcLinear(double x) {
-        return x;
+        return x/10.0;
     }
 
     /**
-     * Calcula a derivada da função linear f'(x) = 1
+     * Calcula a derivada da função linear f'(x) = 1/10
      *
      * @param x double - valor de entrada
      * @return double - retorna a derivada da função linear
      */
     private double funcLinearDerivada(double x) {
-        return 1.0;
+        return 1.0/10.0;
     }
 
     /**
@@ -520,7 +520,7 @@ public class RedeNeural {
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             neuronio = camadaSaida.get(i);
 
-            erroSaida = Math.abs(vetSaidas[i] - neuronio.getSaida());
+            erroSaida = vetSaidas[i] - neuronio.getSaida();
             neuronio.setErroSaida(erroSaida);
 
             net = neuronio.getNet();
@@ -533,20 +533,23 @@ public class RedeNeural {
      * Calcula o erro da rede ao fim de cada amostra passar na rede.
      */
     private void calcularErroDaRede() {
-        double somatorio = 0.0;
+        double err = 0.0;
         NeuronioSaida neuronio;
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             neuronio = camadaSaida.get(i);
-            somatorio += neuronio.getErroSaida();
+            //err += Math.pow(neuronio.getErroSaida(), 2);
+            err += neuronio.getErroSaida();
         }
-        erroMedioDaRede = somatorio / amostrasTreinamento.length;
+        err = Math.pow(err, 2);
+        err = 0.5 * err;
+        erroDaRede += err;
     }
 
     /**
      * Calcula o erro médio da rede, para verificar se atingiu o limiar.
      */
     private void calcularErroMedioDaRede() {
-        
+        erroMedioDaRede = erroDaRede / amostrasTreinamento.length;
     }
 
     /**

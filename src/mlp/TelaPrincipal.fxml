@@ -21,7 +21,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <Label layoutX="285.0" layoutY="75.0" text="Nº Classes">
+      <Label layoutX="306.0" layoutY="74.0" text="Nº Classes">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
@@ -86,7 +86,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Button>
-      <TextArea fx:id="txtSaidas" layoutX="26.0" layoutY="257.0" prefHeight="280.0" prefWidth="715.0" />
+      <TextArea fx:id="txtSaidas" editable="false" layoutX="26.0" layoutY="257.0" prefHeight="280.0" prefWidth="715.0" />
       <Button fx:id="btnTreinar" layoutX="37.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnTreinar" style="-fx-background-color: lightblue;" text="Treinar">
          <font>
             <Font name="System Bold" size="14.0" />
