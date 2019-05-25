@@ -35,6 +35,7 @@ public class Util {
                 } else {
                     double classe = Double.parseDouble(dados.get(lin)[col]);
                     int indexClasse = (int) classe;
+                    indexClasse -= 1;
                     for (int k = 0; k < nSaida; k++) {
                         if (k == indexClasse) {
                             matrizSaidas[lin][k] = 1.0;

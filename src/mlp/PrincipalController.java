@@ -73,6 +73,11 @@ public class PrincipalController implements Initializable {
     private Button btnIniciarTeste;
     @FXML
     private Button btnCancelar;
+    
+    /**
+     * Objeto da rede neural.
+     */
+    RedeNeural mlp;
 
     /**
      * Initializes the controller class.
@@ -117,8 +122,6 @@ public class PrincipalController implements Initializable {
      */
     @FXML
     private void clkBtnIniciarTreino(MouseEvent event) {
-        txtSaidas.clear();
-
         
         int nEntrada = Integer.parseInt(txtAtributos.getText());
         int nSaida = Integer.parseInt(txtClasses.getText());
@@ -126,7 +129,7 @@ public class PrincipalController implements Initializable {
         double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
         Util util = new Util();
 
-        RedeNeural mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta, nSaida);
+        mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta, nSaida);
 
         String caminhoArquivo = txtCaminhoArquivo.getText();
         ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
@@ -135,6 +138,10 @@ public class PrincipalController implements Initializable {
         double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
         double[][] amostrasNormalizadas = util.normalizarDados(matrizAmostras);
 
+        // Minha base de dados
+        //mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
+        
+        // Base de dados do professor
         mlp.setDadosTreinamento(amostrasNormalizadas, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
 
         if (rdErro.isSelected()) {
@@ -156,6 +163,7 @@ public class PrincipalController implements Initializable {
         txtSaidas.clear();
         mlp.treinar();
         txtSaidas.appendText(mlp.resultadoTreinamento());
+        btnTestar.setDisable(false);
     }
 
     /**
@@ -169,7 +177,25 @@ public class PrincipalController implements Initializable {
 
     @FXML
     private void clkBtnIniciarTeste(MouseEvent event) {
+        Util util = new Util();
+        int nEntrada = Integer.parseInt(txtAtributos.getText());
+        int nSaida = Integer.parseInt(txtClasses.getText());
         
+        String caminhoArquivo = txtCaminhoArquivo.getText();
+        ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
+        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
+        
+        double[][] dadosTeste = dadosConvertidos.get(0);
+        double[][] SaidasEsperadas = dadosConvertidos.get(1);
+        double[][] dadosTesteNormalizados = util.normalizarDados(dadosTeste);
+        
+        txtSaidas.clear();
+        // Minha base de dados
+        //mlp.testar(dadosTeste, SaidasEsperadas);
+        
+        // Base de dados do professor
+        mlp.testar(dadosTesteNormalizados, SaidasEsperadas);
+        txtSaidas.appendText(mlp.resultadoTeste());
     }
 
     /**
@@ -195,7 +221,7 @@ public class PrincipalController implements Initializable {
         txtSaidas.setDisable(true);
         btnTreinar.setDisable(false);
         btnIniciarTreino.setDisable(true);
-        btnTestar.setDisable(false);
+        btnTestar.setDisable(true);
         btnIniciarTeste.setDisable(true);
     }
 
@@ -249,10 +275,12 @@ public class PrincipalController implements Initializable {
         pnTaxaAprendazagem.setDisable(true);
         pnFuncaoAtivacao.setDisable(true);
         txtSaidas.setDisable(false);
+        txtSaidas.clear();
         btnTreinar.setDisable(true);
         btnIniciarTreino.setDisable(true);
         btnTestar.setDisable(true);
         btnIniciarTeste.setDisable(false);
+        btnProcurar.requestFocus();
     }
 
 }

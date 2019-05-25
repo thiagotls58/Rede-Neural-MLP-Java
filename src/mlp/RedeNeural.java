@@ -97,11 +97,6 @@ public class RedeNeural {
     private double[][] pesosCamadaOculta;
 
     /**
-     * bias utilizado no cálculo do net do neurônio
-     */
-    private final double bias = 1.0;
-
-    /**
      * Deve ser calculado ao fim de cada amostra
      */
     private double erroDaRede;
@@ -115,6 +110,27 @@ public class RedeNeural {
      * Número epocas que o treinamento foi realizado
      */
     private int totalEpocas;
+    
+    /**
+     * Matriz de confusão da rede
+     */
+    private int[][] matrizConfusao;
+    
+    /**
+     * Quantidade de dados para os testes
+     */
+    private int qtdDadosTeste;
+    
+    /**
+     * Total de acertos no teste da rede
+     */
+    private int totalAcertos;
+    
+    /**
+     * Porcentagem de acurácia da rede
+     */
+    private double acuracia;
+    
 
     /**
      * Recebe os parâmetros inicializa os pesos da rede.
@@ -220,22 +236,22 @@ public class RedeNeural {
      * @return double - retorna a derivada da função logística
      */
     private double funcLogisticaDerivada(double x) {
-        return Math.exp(-x) / Math.pow((1 + Math.exp(-x)),2);
+        double resp = this.funcLogistica(x);
+        return resp * (1 - resp);
     }
 
     /**
-     * Função de ativação tangente hiperbólica f(x) = 2 / (1 + exp(-x)) - 1
+     * Função de ativação tangente hiperbólica
      *
      * @param x double - net do neurônio da rede
      * @return double - retorna saída do neurônio
      */
     private double funcTangenteHiperbolica(double x) {
-        return 2 / (1 + Math.exp(-2 * x)) - 1;
+        return Math.tanh(x);
     }
 
     /**
-     * Calcula a derivada da função tangente hiperbólica f'(x) = 0.5 * (1 +
-     * f(x)) * (1 - f(x))
+     * Calcula a derivada da função tangente hiperbólica
      *
      * @param x double - valor de entrada
      * @return double - retorna a derivada da função tangente hiperbolica
@@ -325,7 +341,7 @@ public class RedeNeural {
      */
     private void verificarErroDaRede() {
         if (this.limiteErro == 0.0) {
-            this.limiteErro = 0.0000001;
+            this.limiteErro = 0.001;
         }
     }
     
@@ -390,7 +406,7 @@ public class RedeNeural {
             /**
              * Enquanto não atingir o limite de erro, ou o limite de épocas
              */
-            while ((Math.abs(erroMedioDaRede) > limiteErro) && (epocas < limiteEpocas)) {
+            while ((erroMedioDaRede > limiteErro) && (epocas < limiteEpocas)) {
                 erroDaRede = 0.0;
                 epocas++;
                 SortearSequencia();
@@ -419,10 +435,51 @@ public class RedeNeural {
             totalEpocas = epocas;
             System.out.println();
             System.out.println("Pesos camada entrada");
-            System.out.println(printarMatriz(pesosCamadaEntrada));
+            System.out.println(printarMatrizDouble(pesosCamadaEntrada));
             System.out.println();
             System.out.println("Pesos camada saída");
-            System.out.println(printarMatriz(pesosCamadaOculta));
+            System.out.println(printarMatrizDouble(pesosCamadaOculta));
+        }
+    }
+    
+    public void testar(double[][] dadosTeste, double[][] saidasEsperadas) {
+
+        int posCorreta;
+        int posCalculada;
+        int nmrClasses = saidasEsperadas[0].length;
+        qtdDadosTeste = dadosTeste.length;
+        vetEntradas = new double[nmrEntrada];
+        vetSaidas = new double[nmrNeuroniosSaida];
+        totalAcertos = 0;
+        acuracia = 0.0;
+        if (dadosTeste != null && saidasEsperadas != null) {
+            
+            matrizConfusao = new int[nmrClasses][nmrClasses];
+            for(int i = 0; i < nmrClasses; i++) {
+                for (int j = 0; j < nmrClasses; j++) {
+                    matrizConfusao[i][j] = 0;
+                }
+            }
+            
+            //Percorrer todo o conjunto de amostras
+            for (int i = 0; i < qtdDadosTeste; i++) {
+
+                System.arraycopy(dadosTeste[i], 0, vetEntradas, 0,
+                        dadosTeste[i].length); // copiamos os dados de entrada para o vetor entradas
+                System.arraycopy(saidasEsperadas[i], 0, vetSaidas, 0, saidasEsperadas[i].length); //copiamos os dados de resultado esperado para vetSaidas
+
+                propagar();
+                posCorreta = encontrarPosCorreta(vetSaidas);
+                posCalculada = encontrarPosCalculada(camadaSaida);
+                
+                if (posCorreta == posCalculada)
+                    totalAcertos++;
+                
+                matrizConfusao[posCorreta][posCalculada] += 1;
+                
+            }
+            
+            acuracia = ((double)totalAcertos/qtdDadosTeste) * 100.0;
         }
     }
 
@@ -459,8 +516,6 @@ public class RedeNeural {
                 resultado = vetEntradas[j] * pesosCamadaEntrada[j][i];
                 net += resultado;
             }
-
-            net += bias;
             camadaOculta.get(i).setNet(net);
         }
     }
@@ -489,8 +544,6 @@ public class RedeNeural {
                 resultado = camadaOculta.get(j).getSaida() * pesosCamadaOculta[j][i];
                 net += resultado;
             }
-
-            net += bias;
             camadaSaida.get(i).setNet(net);
         }
     }
@@ -537,10 +590,8 @@ public class RedeNeural {
         NeuronioSaida neuronio;
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             neuronio = camadaSaida.get(i);
-            //err += Math.pow(neuronio.getErroSaida(), 2);
-            err += neuronio.getErroSaida();
+            err += Math.pow(neuronio.getErroSaida(), 2);
         }
-        err = Math.pow(err, 2);
         err = 0.5 * err;
         erroDaRede += err;
     }
@@ -556,23 +607,22 @@ public class RedeNeural {
      * Calcula o erro de cada neurônio da camada oculta.
      */
     private void calcularErroCamadaOculta() {
-        double erroGradienteSaida = 0.0;
         NeuronioOculto neuronio;
         double erro;
-        double derivada;        
+        double derivada;
+        double gradiente;
         
-        // obtêm o somatório do erroGradiente dos neurônios da camada oculta
-        for (int i = 0; i < nmrNeuroniosSaida; i++) {
-            erroGradienteSaida += camadaSaida.get(i).getErroGradiente();
-        }
         // calcula o erro dos neuronios da camada oculta
         for (int i = 0; i < nmrNeuroniosOculta; i++) {
             neuronio = camadaOculta.get(i);
             derivada = calcularDerivadaFuncAtivacao(neuronio.getNet());
             erro = 0.0;
             for (int j = 0; j < nmrNeuroniosSaida; j++) {
-                erro += (erroGradienteSaida * pesosCamadaOculta[i][j]) * derivada;
+                gradiente = camadaSaida.get(j).getErroGradiente();
+                erro += gradiente * pesosCamadaOculta[i][j];
             }
+            
+            erro = erro * derivada;
             
             neuronio.setErroGradiente(erro);
         }
@@ -635,20 +685,55 @@ public class RedeNeural {
     }
 
     /**
-     * Escrevo no console os dados de uma matriz.
+     * Encontra a posição (classe) correta para a entrada.
+     * @param vetSaidas double[][] - vetor de saida esperada.
+     * @return int - posicação encotrada
+     */
+    private int encontrarPosCorreta(double[] vetSaidas) {
+        for (int pos = 0; pos < vetSaidas.length; pos++) {
+            if (vetSaidas[pos] == 1.0)
+                return pos;
+        }
+        return -1;
+    }
+
+    /**
+     * Encontra a posição (classe) calculada na rede.
+     * @param camadaSaida List<NeuronioSaida> - camada de saída da rede
+     * @return int - posição encontrada
+     */
+    private int encontrarPosCalculada(List<NeuronioSaida> camadaSaida) {
+        double maior = 0.0;
+        int posicao = -1;
+        NeuronioSaida neuronio;
+        for(int pos = 0; pos < camadaSaida.size(); pos++) {
+            neuronio = camadaSaida.get(pos);
+            if (neuronio.getSaida() > maior) {
+                maior = neuronio.getSaida();
+                posicao = pos;
+            }
+        }
+        
+        return posicao;
+    }
+    
+    /**
+     * Constrói uma String com os dados da matriz.
+     *
      * @param matriz double[][] - matriz para printar no console
      */
-    private String printarMatriz(double[][] matriz) {
+    private String printarMatrizDouble(double[][] matriz) {
         String str = "";
         String format = "";
         for (int i = 0; i < matriz.length; i++) {
             str += "[";
-            for (int j = 0; j < matriz[0].length; j++){
+            for (int j = 0; j < matriz[0].length; j++) {
                 format = String.format("%.2f", matriz[i][j]);
-                if (j == matriz[0].length - 1)
+                if (j == matriz[0].length - 1) {
                     str += format;
-                else
+                } else {
                     str += format + ", ";
+                }
             }
             str += "]\n";
         }
@@ -656,7 +741,74 @@ public class RedeNeural {
     }
     
     /**
+     * Constrói uma String com os dados da matriz.
+     *
+     * @param matriz int[][] - matriz para printar no console
+     */
+    private String printarMatrizInteger(int[][] matriz) {
+        int classe;
+        String str = "";
+        for (int i = 0; i < matriz.length; i++) {
+            classe = i + 1;
+            str += "    c" + classe;
+        }
+        str += "\n";
+        for (int i = 0; i < matriz.length; i++) {
+            classe = i + 1;
+            str += "c" + classe;
+            str += "[";
+            for (int j = 0; j < matriz[0].length; j++) {
+                if (j == matriz[0].length - 1) {
+                    str += matriz[i][j];
+                } else {
+                    str += matriz[i][j] + ", ";
+                }
+            }
+            str += "]\n";
+        }
+        return str;
+    }
+    
+    /**
+     * Contrói um gráfico da matriz de confusão.
+     * @param matriz int[][] - dados para o gráfico
+     * @return String - Gráfico em formato texto
+     */
+    private String construirGrafico(int[][] matriz) {
+        String str = "";
+        String format;
+        double percentual;
+        int classe;
+        int[] vetorSum = new int[matriz.length];
+        
+        for (int i = 0; i < matriz.length; i++) {
+            for (int j = 0; j < matriz[0].length; j++) {
+                vetorSum[i] += matriz[i][j];
+            }
+        }
+        
+        for (int i = 0; i < matriz.length; i++) {
+            classe = i + 1;
+            str += "classe " + classe + ": ";
+            for (int j = 0; j < matriz[0].length; j++) {
+                if (i == j) {
+                    percentual = ((double) matriz[i][j] / (double) vetorSum[i]) * 100.0;
+                    format = String.format("%.1f", percentual);
+                    for (int l = 0; l < (int) percentual; l++) {
+                        str += "*";
+                    }
+                    str += "  " + format + "%";
+                }
+            }
+            str += "\n";
+        }
+        
+        return str;
+    }
+
+    /**
      * Retorna os resultados do treinamento
+     *
      * @return string - dados do treinamento
      */
     public String resultadoTreinamento() {
@@ -666,10 +818,28 @@ public class RedeNeural {
         str += "Número de Épocas: " + totalEpocas + "\n";
         str += "\n";
         str += "Pesos camada entrada\n";
-        str += printarMatriz(pesosCamadaEntrada);
+        str += printarMatrizDouble(pesosCamadaEntrada);
         str += "\n";
         str += "Pesos camada saída\n";
-        str += printarMatriz(pesosCamadaOculta);
+        str += printarMatrizDouble(pesosCamadaOculta);
+
+        return str;
+    }
+    
+    public String resultadoTeste() {
+        String str = "";
+        str += "Fim dos testes...\n";
+        str += "Acertos: " + totalAcertos + " de " + qtdDadosTeste + "\n";
+        String format = String.format("%.2f", acuracia);
+        str += "Acurácia: " + format + "%\n";
+        str += "\n";
+        str += "\n";
+        str += "Matriz de Confusão\n";
+        str += printarMatrizInteger(matrizConfusao);
+        str += "\n";
+        str += "\n";
+        str += "Gráfico\n";
+        str += construirGrafico(matrizConfusao);
         
         return str;
     }
