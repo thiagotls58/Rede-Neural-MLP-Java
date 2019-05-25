@@ -36,14 +36,6 @@ public class PrincipalController implements Initializable {
     @FXML
     private AnchorPane pnCriterioParada;
     @FXML
-    private RadioButton rdErro;
-    @FXML
-    private ToggleGroup grupoCriterioParada;
-    @FXML
-    private RadioButton rdIteracao;
-    @FXML
-    private TextField txtCriterioParada;
-    @FXML
     private AnchorPane pnTaxaAprendazagem;
     @FXML
     private TextField txtTaxaAprendizagem;
@@ -73,7 +65,10 @@ public class PrincipalController implements Initializable {
     private Button btnIniciarTeste;
     @FXML
     private Button btnCancelar;
-    
+    @FXML
+    private TextField txtErro;
+    @FXML
+    private TextField txtEpocas;
     /**
      * Objeto da rede neural.
      */
@@ -123,17 +118,19 @@ public class PrincipalController implements Initializable {
     @FXML
     private void clkBtnIniciarTreino(MouseEvent event) {
         
-        int nEntrada = Integer.parseInt(txtAtributos.getText());
-        int nSaida = Integer.parseInt(txtClasses.getText());
-        int nCamadaOculta = (nEntrada + nSaida) / 2;
+        int nmrEntrada = Integer.parseInt(txtAtributos.getText());
+        int nmrSaida = Integer.parseInt(txtClasses.getText());
+        int nmrCamadaOculta = (nmrEntrada + nmrSaida) / 2;
+        double limiteErro = Double.parseDouble(txtErro.getText());
+        int limiteEpocas = Integer.parseInt(txtEpocas.getText());
         double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
         Util util = new Util();
 
-        mlp = new RedeNeural(taxaAprendizado, nEntrada, nCamadaOculta, nSaida);
+        mlp = new RedeNeural(nmrEntrada, nmrSaida, nmrCamadaOculta, limiteErro, limiteEpocas, taxaAprendizado);
 
         String caminhoArquivo = txtCaminhoArquivo.getText();
         ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
-        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
+        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nmrEntrada, nmrSaida);
         double[][] matrizAmostras = dadosConvertidos.get(0);
         double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
         double[][] amostrasNormalizadas = util.normalizarDados(matrizAmostras);
@@ -142,15 +139,7 @@ public class PrincipalController implements Initializable {
         //mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
         
         // Base de dados do professor
-        mlp.setDadosTreinamento(amostrasNormalizadas, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
-
-        if (rdErro.isSelected()) {
-            double limiteErro = Double.parseDouble(txtCriterioParada.getText());
-            mlp.setLimiteErro(limiteErro);
-        } else {
-            int limiteEpocas = Integer.parseInt(txtCriterioParada.getText());
-            mlp.setLimiteEpocas(limiteEpocas);
-        }
+        mlp.setDadosTreinamento(amostrasNormalizadas, matrizSaidasEsperadas, dadosArquivo.size(), nmrEntrada, nmrSaida);
 
         if (rdLinear.isSelected()) {
             mlp.setFuncaoAtivacao(FuncaoAtivacao.LINEAR);
@@ -234,9 +223,8 @@ public class PrincipalController implements Initializable {
 
         txtCaminhoArquivo.clear();
 
-        rdErro.setSelected(false);
-        rdIteracao.setSelected(false);
-        txtCriterioParada.clear();
+        txtErro.clear();
+        txtEpocas.clear();
 
         txtTaxaAprendizagem.clear();
 

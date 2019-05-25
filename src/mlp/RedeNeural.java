@@ -131,46 +131,25 @@ public class RedeNeural {
      */
     private double acuracia;
     
-
     /**
-     * Recebe os parâmetros inicializa os pesos da rede.
-     *
-     * @param taxaAprendizado - Taxa de aorenzado da rede
-     * @param nmrEntradas - Número de entradas da rede
-     * @param nmrNeuroniosOculta - Número de neurônios da camada oculta
+     * Inicializa a rede neural mlp
+     * @param nmrEntrada int - número de entradas da rede
+     * @param nmrSaida int - número de neurônios na camada de saída da rede
+     * @param nmrCamadaOculta int - número de neurônios na camada oculta da rede
+     * @param limiteErro double - limite de erro da rede
+     * @param limiteEpocas int - limite de épocas da rede
+     * @param taxaAprendizado double - taxa de aprendizado da rede
      */
-    public RedeNeural(double taxaAprendizado, int nmrEntradas, int nmrNeuroniosOculta, int nmrSaidas) {
+    RedeNeural(int nmrEntrada, int nmrSaida, int nmrCamadaOculta, double limiteErro, int limiteEpocas, double taxaAprendizado) {
+        this.nmrEntrada = nmrEntrada;
+        this.nmrNeuroniosSaida = nmrSaida;
+        this.nmrNeuroniosOculta = nmrCamadaOculta;
+        this.limiteErro = limiteErro;
+        this.limiteEpocas = limiteEpocas;
         this.taxaAprendizado = taxaAprendizado;
-        this.nmrEntrada = nmrEntradas;
-        this.nmrNeuroniosOculta = nmrNeuroniosOculta;
-        this.nmrNeuroniosSaida = nmrSaidas;
         this.inicializarPesos();
         this.inicializarCamadaOculta();
         this.inicializarCamadaSaida();
-    }
-
-    /**
-     *
-     * @return int - Retorna o número de épocas da rede
-     */
-    public int getLimiteEpocas() {
-        return limiteEpocas;
-    }
-
-    /**
-     *
-     * @param limiteEpocas int - Atribui o limite de épocas da rede
-     */
-    public void setLimiteEpocas(int limiteEpocas) {
-        this.limiteEpocas = limiteEpocas;
-    }
-
-    /**
-     *
-     * @return double - Retorna taxa de erro da rede
-     */
-    public double getLimiteErro() {
-        return limiteErro;
     }
 
     /**
@@ -189,14 +168,6 @@ public class RedeNeural {
      */
     public FuncaoAtivacao getFuncaoAtivacao() {
         return funcaoAtivacao;
-    }
-
-    /**
-     *
-     * @param limiteErro int - Atribui a taxa de erro desejado da rede
-     */
-    public void setLimiteErro(double limiteErro) {
-        this.limiteErro = limiteErro;
     }
 
     /**
@@ -325,25 +296,6 @@ public class RedeNeural {
         System.arraycopy(matrizSaidasEsperadas, 0, saidaEsperada, 0, matrizSaidasEsperadas.length);
     }
 
-    /**
-     * Verifica se o número de épocas foi definido pelo usuário, caso não tenha
-     * sido definido, o valor padrão será 99.999.
-     */
-    private void verificarNmrEpocas() {
-        if (this.limiteEpocas == 0) {
-            this.limiteEpocas = 99999;
-        }
-    }
-
-    /**
-     * Verifica se o erro da rede foi definido pelo usuário, caso não tenha sido
-     * definido, o valor padrão será 0.1.
-     */
-    private void verificarErroDaRede() {
-        if (this.limiteErro == 0.0) {
-            this.limiteErro = 0.001;
-        }
-    }
     
     /**
      * Calcula a função de ativação.
@@ -393,8 +345,6 @@ public class RedeNeural {
      * Efetua o treinamento da rede neural
      */
     public void treinar() {
-        verificarNmrEpocas();
-        verificarErroDaRede();
         erroMedioDaRede = 10.0;
         int epocas = 0;
         int index;
