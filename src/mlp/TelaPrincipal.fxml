@@ -11,23 +11,40 @@
 
 <AnchorPane id="AnchorPane" prefHeight="620.0" prefWidth="762.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mlp.PrincipalController">
    <children>
-      <Label layoutX="243.0" layoutY="14.0" text="Rede Neural MLP">
+      <Label layoutX="243.0" layoutY="4.0" text="Rede Neural MLP">
          <font>
             <Font name="System Bold" size="36.0" />
          </font>
       </Label>
-      <Label layoutX="24.0" layoutY="73.0" text="Nº Atributos">
+      <Label layoutX="29.0" layoutY="74.0" text="Nº Atributos">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <Label layoutX="306.0" layoutY="74.0" text="Nº Classes">
+      <Label layoutX="200.0" layoutY="75.0" text="Nº Classes">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <TextField fx:id="txtAtributos" layoutX="121.0" layoutY="71.0" />
-      <TextField fx:id="txtClasses" layoutX="381.0" layoutY="71.0" />
+      <Label layoutX="349.0" layoutY="64.0" text="Nº Neurônios Camada Oculta">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="578.0" layoutY="65.0" text="Normalizar Dados?">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <TextField fx:id="txtAtributos" layoutX="120.0" layoutY="72.0" prefHeight="25.0" prefWidth="61.0" />
+      <TextField fx:id="txtClasses" layoutX="274.0" layoutY="73.0" prefHeight="25.0" prefWidth="61.0" />
+      <TextField fx:id="txtQtdNeuronios" layoutX="517.0" layoutY="81.0" prefHeight="25.0" prefWidth="30.0" />
+      <RadioButton fx:id="rdPadrao" layoutX="349.0" layoutY="86.0" mnemonicParsing="false" onMouseClicked="#clkRdPadrao" text="Padrão">
+         <toggleGroup>
+            <ToggleGroup fx:id="grupoNumNeuronios" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="rdPersonalizado" layoutX="412.0" layoutY="87.0" mnemonicParsing="false" onMouseClicked="#clkRdPersonalizado" text="Personalizado" toggleGroup="$grupoNumNeuronios" />
       <AnchorPane fx:id="pnArquivo" layoutX="24.0" layoutY="103.0" prefHeight="63.0" prefWidth="715.0">
          <children>
             <Label layoutY="1.0" text="Selecione o arquivo" />
@@ -85,7 +102,7 @@
       </Button>
       <TextArea fx:id="txtSaidas" editable="false" layoutX="26.0" layoutY="257.0" prefHeight="280.0" prefWidth="715.0">
          <font>
-            <Font size="16.0" />
+            <Font size="14.0" />
          </font></TextArea>
       <Button fx:id="btnTreinar" layoutX="37.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnTreinar" style="-fx-background-color: lightblue;" text="Treinar">
          <font>
@@ -107,5 +124,11 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Button>
+      <RadioButton fx:id="rdSim" layoutX="586.0" layoutY="88.0" mnemonicParsing="false" text="Sim">
+         <toggleGroup>
+            <ToggleGroup fx:id="grupoNormalizar" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="rdNao" layoutX="649.0" layoutY="89.0" mnemonicParsing="false" text="Não" toggleGroup="$grupoNormalizar" />
    </children>
 </AnchorPane>

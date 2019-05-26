@@ -69,10 +69,25 @@ public class PrincipalController implements Initializable {
     private TextField txtErro;
     @FXML
     private TextField txtEpocas;
+    @FXML
+    private TextField txtQtdNeuronios;
+    @FXML
+    private RadioButton rdPadrao;
+    @FXML
+    private ToggleGroup grupoNumNeuronios;
+    @FXML
+    private RadioButton rdPersonalizado;
+    @FXML
+    private RadioButton rdSim;
+    @FXML
+    private ToggleGroup grupoNormalizar;
+    @FXML
+    private RadioButton rdNao;
     /**
      * Objeto da rede neural.
      */
     RedeNeural mlp;
+    double[][] parametros;
 
     /**
      * Initializes the controller class.
@@ -120,7 +135,13 @@ public class PrincipalController implements Initializable {
         
         int nmrEntrada = Integer.parseInt(txtAtributos.getText());
         int nmrSaida = Integer.parseInt(txtClasses.getText());
-        int nmrCamadaOculta = (nmrEntrada + nmrSaida) / 2;
+        
+        int nmrCamadaOculta = 0;
+        if(rdPadrao.isSelected())
+            nmrCamadaOculta = (nmrEntrada + nmrSaida) / 2;
+        else if (rdPersonalizado.isSelected())
+            nmrCamadaOculta = Integer.parseInt(txtQtdNeuronios.getText());
+        
         double limiteErro = Double.parseDouble(txtErro.getText());
         int limiteEpocas = Integer.parseInt(txtEpocas.getText());
         double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
@@ -133,13 +154,13 @@ public class PrincipalController implements Initializable {
         ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nmrEntrada, nmrSaida);
         double[][] matrizAmostras = dadosConvertidos.get(0);
         double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
-        double[][] amostrasNormalizadas = util.normalizarDados(matrizAmostras);
-
-        // Minha base de dados
-        //mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nEntrada, nSaida);
         
-        // Base de dados do professor
-        mlp.setDadosTreinamento(amostrasNormalizadas, matrizSaidasEsperadas, dadosArquivo.size(), nmrEntrada, nmrSaida);
+        if(rdSim.isSelected()) {
+            parametros = util.obterParametrosNormalizacao(matrizAmostras);
+            matrizAmostras = util.normalizarDados(matrizAmostras, parametros);
+        }
+        
+        mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nmrEntrada, nmrSaida);
 
         if (rdLinear.isSelected()) {
             mlp.setFuncaoAtivacao(FuncaoAtivacao.LINEAR);
@@ -149,7 +170,7 @@ public class PrincipalController implements Initializable {
             mlp.setFuncaoAtivacao(FuncaoAtivacao.HIPERBOLICA);
         }
 
-        txtSaidas.clear();
+        limparConsole();
         mlp.treinar();
         txtSaidas.appendText(mlp.resultadoTreinamento());
         btnTestar.setDisable(false);
@@ -176,14 +197,14 @@ public class PrincipalController implements Initializable {
         
         double[][] dadosTeste = dadosConvertidos.get(0);
         double[][] SaidasEsperadas = dadosConvertidos.get(1);
-        double[][] dadosTesteNormalizados = util.normalizarDados(dadosTeste);
         
-        txtSaidas.clear();
-        // Minha base de dados
-        //mlp.testar(dadosTeste, SaidasEsperadas);
+        if(rdSim.isSelected()) {
+            // normaliza os dados.
+            dadosTeste = util.normalizarDados(dadosTeste, parametros);
+        }
         
-        // Base de dados do professor
-        mlp.testar(dadosTesteNormalizados, SaidasEsperadas);
+        limparConsole();
+        mlp.testar(dadosTeste, SaidasEsperadas);
         txtSaidas.appendText(mlp.resultadoTeste());
     }
 
@@ -203,6 +224,11 @@ public class PrincipalController implements Initializable {
     private void estadoInicial() {
         txtAtributos.setDisable(true);
         txtClasses.setDisable(true);
+        rdPadrao.setDisable(true);
+        rdPersonalizado.setDisable(true);
+        txtQtdNeuronios.setDisable(true);
+        rdSim.setDisable(true);
+        rdNao.setDisable(true);
         pnArquivo.setDisable(true);
         pnCriterioParada.setDisable(true);
         pnTaxaAprendazagem.setDisable(true);
@@ -220,7 +246,12 @@ public class PrincipalController implements Initializable {
     private void limparComponentes() {
         txtAtributos.clear();
         txtClasses.clear();
-
+        rdPadrao.setSelected(false);
+        rdPersonalizado.setSelected(false);
+        txtQtdNeuronios.clear();
+        rdSim.setSelected(false);
+        rdNao.setSelected(false);
+        
         txtCaminhoArquivo.clear();
 
         txtErro.clear();
@@ -241,6 +272,10 @@ public class PrincipalController implements Initializable {
     private void estadoTreino() {
         txtAtributos.setDisable(false);
         txtClasses.setDisable(false);
+        rdPadrao.setDisable(false);
+        rdPersonalizado.setDisable(false);
+        rdSim.setDisable(false);
+        rdNao.setDisable(false);
         pnArquivo.setDisable(false);
         pnCriterioParada.setDisable(false);
         pnTaxaAprendazagem.setDisable(false);
@@ -256,8 +291,13 @@ public class PrincipalController implements Initializable {
      * Configura os componentes da tela para testar a rede.
      */
     private void estadoTeste() {
-        txtAtributos.setDisable(false);
-        txtClasses.setDisable(false);
+        txtAtributos.setDisable(true);
+        txtClasses.setDisable(true);
+        rdPadrao.setDisable(true);
+        rdPersonalizado.setDisable(true);
+        txtQtdNeuronios.setDisable(true);
+        rdSim.setDisable(true);
+        rdNao.setDisable(true);
         pnArquivo.setDisable(false);
         pnCriterioParada.setDisable(true);
         pnTaxaAprendazagem.setDisable(true);
@@ -269,6 +309,22 @@ public class PrincipalController implements Initializable {
         btnTestar.setDisable(true);
         btnIniciarTeste.setDisable(false);
         btnProcurar.requestFocus();
+    }
+
+    @FXML
+    private void clkRdPersonalizado(MouseEvent event) {
+        txtQtdNeuronios.setDisable(false);
+        txtQtdNeuronios.requestFocus();
+    }
+
+    @FXML
+    private void clkRdPadrao(MouseEvent event) {
+        txtQtdNeuronios.setDisable(true);
+    }
+
+    private void limparConsole() {
+        txtSaidas.setDisable(false);
+        txtSaidas.clear();
     }
 
 }

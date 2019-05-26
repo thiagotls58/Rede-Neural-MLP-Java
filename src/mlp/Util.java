@@ -51,14 +51,37 @@ public class Util {
         retorno.add(matrizSaidas);
         return retorno;
     }
+    
+    /**
+     * Encontra os parâmetros para efetuar a normalização dos dados
+     * @param matriz double[][] - matriz onde os parâmentros serão encontrados
+     * @return double[][] - parâmetros da normalização
+     */
+    public double[][] obterParametrosNormalizacao(double[][] matriz) {
+        double min;
+        double max;
+        int numParametros = 2;
+        int numColunas = matriz[0].length;
+        double[][] parametros = new double[2][numColunas];
+        
+        for (int i = 0; i < numColunas; i++) {
+            min = valorMinimo(matriz, i);
+            max = valorMaximo(matriz, i);
+            parametros[0][i] = min;
+            parametros[1][i] = max;
+        }
+        
+        return parametros;
+    }
 
     /**
      * Efetua normalização dos dados da matriz
      * novoX = (x - min(matriz)) / (max(matriz) - min(matriz)).
      * @param matriz double[][] - matriz de dados para ser normalizada
+     * @param parametros double[][] - matriz de parâmentros para a normalização
      * @return double[][] - matriz de dados normalizada
      */
-    public double[][] normalizarDados(double[][] matriz) {
+    public double[][] normalizarDados(double[][] matriz, double[][] parametros) {
         int numCol = matriz[0].length;
         int numLin = matriz.length;
         double[][] matrizNormalizada = new double[numLin][numCol];
@@ -66,10 +89,10 @@ public class Util {
         double max;
         double novoValor;
         double valorAtual;
-
+        
         for (int col = 0; col < numCol; col++) {
-            min = valorMinimo(matriz, col);
-            max = valorMaximo(matriz, col);
+            min = parametros[0][col];
+            max = parametros[1][col];
             for (int lin = 0; lin < numLin; lin++) {
                 valorAtual = matriz[lin][col];
                 novoValor = (valorAtual-min)/(max-min);
