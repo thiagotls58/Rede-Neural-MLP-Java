@@ -22,6 +22,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
@@ -312,9 +313,13 @@ public class PrincipalController implements Initializable {
             }
 
             limparConsoleTreinamento();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setContentText("Por favor, aguarde o fim do treinamento!");
+            alert.showAndWait();
             mlp.treinar();
             txtConsoleTreinamento.appendText(mlp.resultadoTreinamento());
             preencherResultadosTreinamento();
+            //limparGraficoTreinameto();
             preencherGraficoTreinamento();
             estadoInicialTeste();
         }
@@ -543,7 +548,9 @@ public class PrincipalController implements Initializable {
         }
         dadosTreinamento.setName("Treino" + treino);
         listaDadosDoGraficoTreinamento.add(dadosTreinamento);
+        
         graficoTreinamento.getData().addAll(dadosTreinamento);
+
     }
 
     /**
@@ -732,6 +739,8 @@ public class PrincipalController implements Initializable {
         int coluna;
         int linha;
         int[][] matriz = mlp.getMatrizConfusao();
+        int[] vetTotalAmostras = getTotalAmostras(matriz);
+        double[] vetAcuraciaClasse = getAcuraciaDaClasse(matriz);
         TextField textField;
         
         // monta o cabeçalho
@@ -748,7 +757,19 @@ public class PrincipalController implements Initializable {
             matrizConfusao.add(textField, 0, linha, 1, 1);
         }
         
+        linha = matriz.length + 1;
+        coluna = matriz.length + 1;
+        
+        textField = getTextFieldCabecalho();
+        textField.setText("Total");
+        matrizConfusao.add(textField, 0, linha, 1, 1);
+        
+        textField = getTextFieldCabecalho();
+        textField.setText("Acurácia");
+        matrizConfusao.add(textField, coluna, 0, 1, 1);
+        
         // preencher com os dados
+        
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[0].length; j++) {
                 if (i == j) {
@@ -764,18 +785,70 @@ public class PrincipalController implements Initializable {
             }
         }
         
-        matrizConfusao.setHgap(1);
-        matrizConfusao.setVgap(1);
+        for (int i = 0; i < vetTotalAmostras.length; i++) {
+            linha = matriz.length + 1;
+            coluna = i + 1;
+            textField = getTextFieldTotal();
+            textField.setText(String.valueOf(vetTotalAmostras[i]));
+            matrizConfusao.add(textField, coluna, linha, 1, 1);
+        }
+        
+        for (int i = 0; i < vetAcuraciaClasse.length; i++) {
+            linha = i + 1;
+            coluna = matriz.length + 1;
+            textField = getTextFieldAcuracia();
+            String strAcuracia = String.format("%.0f", vetAcuraciaClasse[i]);
+            textField.setText(strAcuracia + " %");
+            matrizConfusao.add(textField, coluna, linha, 1, 1);
+        }
+        
     }
     
-    private TextField getTextFieldVazio() {
-        TextField textField = new TextField();
-        textField.setEditable(false);
-        textField.prefWidth(90.0);
-        textField.prefHeight(30.0);
-                
-        return textField;
+    /**
+     * Calcula o total de amostras de cada coluna da matriz de confusão.
+     * @param matriz int[][] - matriz de confusão
+     * @return int[] - vetor com somatório das amostras de cada coluna
+     */
+    private int[] getTotalAmostras(int[][] matriz) {
+        int[] vet = new int[matriz.length];
+        int total;
+        
+        for (int i = 0; i < matriz[0].length; i++) {
+            total = 0;
+            for (int j = 0; j < matriz.length; j++) {
+                total += matriz[j][i];
+            }
+            vet[i] = total;
+        }
+        
+        return vet;
     }
+    
+    /**
+     * Calcula a acurácia de cada classedo arquivo de teste.
+     * @param matriz int[][] - matriz de confusão
+     * @return double[] - vetor de acurácia de classe.
+     */
+    private double[] getAcuraciaDaClasse(int[][] matriz) {
+        double[] vetAcuracia = new double[matriz.length];
+        double acuracia;
+        int acertos = 0;
+        int totalLinha;
+        for (int i = 0; i < matriz.length; i++) {
+            totalLinha = 0;
+            for (int j = 0; j < matriz[0].length; j++) {
+                if (i == j) {
+                    acertos = matriz[i][j];
+                }
+                totalLinha += matriz[i][j];
+            }
+            acuracia = ((double) acertos / totalLinha) * 100.0;
+            vetAcuracia[i] = acuracia;
+        }
+        
+        return vetAcuracia;
+    }
+
     
     /**
      * 
@@ -784,8 +857,8 @@ public class PrincipalController implements Initializable {
     private TextField getTextFieldCabecalho() {
         TextField textField = new TextField();
         textField.setEditable(false);
-        textField.prefWidth(90.0);
-        textField.prefHeight(30.0);
+        textField.setPrefWidth(90.0);
+        textField.setPrefHeight(30.0);
         textField.setStyle("-fx-background-color: lightblue;"
             + "-fx-border-color: black;"
             + "-fx-font-weight: bold;"
@@ -801,8 +874,8 @@ public class PrincipalController implements Initializable {
     private TextField getTextFieldAcerto() {
         TextField textField = new TextField();
         textField.setEditable(false);
-        textField.prefWidth(90.0);
-        textField.prefHeight(30.0);
+        textField.setPrefWidth(90.0);
+        textField.setPrefHeight(30.0);
         textField.setStyle("-fx-border-color: black;"
                 + "-fx-font-weight: bold;"
                 + "-fx-alignment: center;"
@@ -813,13 +886,45 @@ public class PrincipalController implements Initializable {
     
     /**
      * 
+     * @return TextField - TextField para o somatório de amostas de cada classe
+     */
+    private TextField getTextFieldTotal() {
+        TextField textField = new TextField();
+        textField.setEditable(false);
+        textField.setPrefWidth(90.0);
+        textField.setPrefHeight(30.0);
+        textField.setStyle("-fx-border-color: black;"
+                + "-fx-font-weight: bold;"
+                + "-fx-alignment: center;"
+                + "-fx-background-color: #B1B2C7;");
+
+        return textField;
+    }
+    
+    private TextField getTextFieldAcuracia() {
+        TextField textField = new TextField();
+        textField.setEditable(false);
+        textField.setPrefWidth(90.0);
+        textField.setPrefHeight(30.0);
+        textField.setStyle("-fx-border-color: black;"
+                + "-fx-font-weight: bold;"
+                + "-fx-alignment: center;"
+                + "-fx-background-color: #EDD4FE;");
+
+        return textField;
+    }
+    
+    
+    
+    /**
+     * 
      * @return TextField - TextField para uma classificação correta
      */
     private TextField getTextFieldErro() {
         TextField textField = new TextField();
         textField.setEditable(false);
-        textField.prefWidth(90.0);
-        textField.prefHeight(30.0);
+        textField.setPrefWidth(90.0);
+        textField.setPrefHeight(30.0);
         textField.setStyle("-fx-border-color: black;"
                 + "-fx-alignment: center;");
 
