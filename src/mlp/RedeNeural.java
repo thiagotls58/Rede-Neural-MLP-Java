@@ -142,6 +142,11 @@ public class RedeNeural {
     private List<Integer> epocasDaRede;
 
     /**
+     * Total de erros no teste da rede.
+     */
+    private int totalErros;
+
+    /**
      * Inicializa a rede neural mlp
      *
      * @param nmrEntrada int - número de entradas da rede
@@ -189,15 +194,15 @@ public class RedeNeural {
     }
 
     /**
-     * 
-     * @return double - Taxa de aprendizado da rede. 
+     *
+     * @return double - Taxa de aprendizado da rede.
      */
     public double getTaxaAprendizado() {
         return taxaAprendizado;
     }
-    
+
     /**
-     * 
+     *
      * @return FuncaoAtivacao - Função de ativação utilizada na rede.
      */
     public FuncaoAtivacao getFuncaoAtivacao() {
@@ -205,13 +210,53 @@ public class RedeNeural {
     }
 
     /**
-     * 
+     *
      * @return double - Erro médio da rede.
      */
     public double getErroMedioDaRede() {
         return erroMedioDaRede;
     }
-    
+
+    /**
+     *
+     * @return double[][] - matriz de confusão
+     */
+    public int[][] getMatrizConfusao() {
+        return matrizConfusao;
+    }
+
+    /**
+     *
+     * @return int - quantidade total de testes
+     */
+    public int getQtdDadosTeste() {
+        return qtdDadosTeste;
+    }
+
+    /**
+     *
+     * @return int - total de acertos da rede
+     */
+    public int getTotalAcertos() {
+        return totalAcertos;
+    }
+
+    /**
+     *
+     * @return int - total de erros da rede
+     */
+    public int getTotalErros() {
+        return totalErros;
+    }
+
+    /**
+     *
+     * @return double - acurácia da rede
+     */
+    public double getAcuracia() {
+        return acuracia;
+    }
+
     /**
      * Função de ativação Linear f(x) = x/10
      *
@@ -420,7 +465,7 @@ public class RedeNeural {
                 epocasDaRede.add(epocas);
                 calcularErroMedioDaRede();
                 errosDaRede.add(erroMedioDaRede);
-                
+
                 System.out.println("Treinando... época: " + epocas + ", erro: " + erroMedioDaRede);
             }
             System.out.println();
@@ -476,6 +521,7 @@ public class RedeNeural {
 
             }
 
+            totalErros = qtdDadosTeste - totalAcertos;
             acuracia = ((double) totalAcertos / qtdDadosTeste) * 100.0;
         }
     }

@@ -22,6 +22,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 
 /**
@@ -148,6 +149,18 @@ public class PrincipalController implements Initializable {
     private AnchorPane pnResultadosTreinamento;
     @FXML
     private TextArea txtResultadosTreinamentos;
+    @FXML
+    private TextField txtTotal;
+    @FXML
+    private TextField txtAcertos;
+    @FXML
+    private TextField txtErros;
+    @FXML
+    private TextField txtAcuracia;
+    @FXML
+    private GridPane matrizConfusao;
+    @FXML
+    private AnchorPane pnResultadoTeste;
 
     /**
      * Initializes the controller class.
@@ -584,15 +597,19 @@ public class PrincipalController implements Initializable {
     }
 
     /*--------------------------------------------------------------------------------------------------------*/
- /*---------------------------- Parte de Testes da rede neural --------------------------------------------*/
- /*--------------------------------------------------------------------------------------------------------*/
+    /*---------------------------- Parte de Testes da rede neural --------------------------------------------*/
+    /*--------------------------------------------------------------------------------------------------------*/
+    
     /**
      * Configura a tela para o estado inicial de teste.
      */
     private void estadoInicialTeste() {
+        pnTreinamento.setDisable(false);
         pnTeste.setDisable(false);
         pnArquivoTeste.setDisable(true);
+        btnTestar.setDisable(false);
         btnIniciarTeste.setDisable(true);
+        pnResultadoTeste.setDisable(true);
     }
 
     /**
@@ -611,8 +628,8 @@ public class PrincipalController implements Initializable {
     private void estadoTeste() {
         pnTreinamento.setDisable(true);
         pnArquivoTeste.setDisable(false);
+        btnTestar.setDisable(true);
         btnIniciarTeste.setDisable(false);
-
     }
 
     /**
@@ -639,26 +656,176 @@ public class PrincipalController implements Initializable {
      */
     @FXML
     private void clkBtnIniciarTeste(MouseEvent event) {
-        Util util = new Util();
-        int nEntrada = Integer.parseInt(txtAtributos.getText());
-        int nSaida = Integer.parseInt(txtClasses.getText());
+        if (validarDadosTeste()) {
+            Util util = new Util();
+            int nEntrada = Integer.parseInt(txtAtributos.getText());
+            int nSaida = Integer.parseInt(txtClasses.getText());
 
-        String caminhoArquivo = txtCaminhoArquivoTeste.getText();
-        ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
-        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
+            String caminhoArquivo = txtCaminhoArquivoTeste.getText();
+            ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
+            ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
 
-        double[][] dadosTeste = dadosConvertidos.get(0);
-        double[][] SaidasEsperadas = dadosConvertidos.get(1);
+            double[][] dadosTeste = dadosConvertidos.get(0);
+            double[][] SaidasEsperadas = dadosConvertidos.get(1);
 
-        if (rdSim.isSelected()) {
-            // normaliza os dados.
-            dadosTeste = util.normalizarDados(dadosTeste, parametros);
+            if (rdSim.isSelected()) {
+                // normaliza os dados.
+                dadosTeste = util.normalizarDados(dadosTeste, parametros);
+            }
+
+            mlp.testar(dadosTeste, SaidasEsperadas);
+            mostrarResultadosDoTeste();
         }
-
-        mlp.testar(dadosTeste, SaidasEsperadas);
-        //txtSaidas.appendText(mlp.resultadoTeste());
+        
     }
+    
+    /**
+     * Valida os dados para o teste da rede
+     * @return boolean - true se estiver correto, caso contrário false.
+     */
+    private boolean validarDadosTeste() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        if (txtCaminhoArquivoTeste.getText().isEmpty()) {
+            alert.setContentText("Por favor, informe o arquivo para teste!");
+            alert.showAndWait();
+            btnProcurarArqTeste.requestFocus();
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Exibe os resultados do teste na rede.
+     */
+    private void mostrarResultadosDoTeste() {
+        pnResultadoTeste.setDisable(false);
+        
+        String strTotal = String.valueOf(mlp.getQtdDadosTeste());
+        txtTotal.setText(strTotal);
+        
+        String strAcertos = String.valueOf(mlp.getTotalAcertos());
+        txtAcertos.setText(strAcertos);
+        
+        String strErros = String.valueOf(mlp.getTotalErros());
+        txtErros.setText(strErros);
+        
+        String strAcuracia = String.format("%.2f", mlp.getAcuracia());
+        txtAcuracia.setText(strAcuracia + " %");
+        
+        limparMatrizConfusao();
+        montarMatrizConfusao();
+    }
+    
+    /**
+     * Limpa da matriz de confusão do teste.
+     */
+    private void limparMatrizConfusao() {
+        matrizConfusao.getChildren().clear();
+    }
+    
+    /**
+     * Monta a matriz de confusão do teste.
+     */
+    private void montarMatrizConfusao() {
+        int classe;
+        int coluna;
+        int linha;
+        int[][] matriz = mlp.getMatrizConfusao();
+        TextField textField;
+        
+        // monta o cabeçalho
+        for (int i = 0; i < matriz.length; i++) {
+            classe = i+1;
+            coluna = i+1;
+            linha = i+1;
+            textField = getTextFieldCabecalho();
+            textField.setText("Classe " + classe);
+            matrizConfusao.add(textField, coluna, 0, 1, 1);
+            
+            textField = getTextFieldCabecalho();
+            textField.setText("Classe " + classe);
+            matrizConfusao.add(textField, 0, linha, 1, 1);
+        }
+        
+        // preencher com os dados
+        for (int i = 0; i < matriz.length; i++) {
+            for (int j = 0; j < matriz[0].length; j++) {
+                if (i == j) {
+                    textField = getTextFieldAcerto();
+                } else {
+                    textField = getTextFieldErro();
+                }
+                
+                textField.setText(String.valueOf(matriz[i][j]));
+                coluna = j + 1;
+                linha = i + 1;
+                matrizConfusao.add(textField, coluna, linha, 1, 1);
+            }
+        }
+        
+        matrizConfusao.setHgap(1);
+        matrizConfusao.setVgap(1);
+    }
+    
+    private TextField getTextFieldVazio() {
+        TextField textField = new TextField();
+        textField.setEditable(false);
+        textField.prefWidth(90.0);
+        textField.prefHeight(30.0);
+                
+        return textField;
+    }
+    
+    /**
+     * 
+     * @return TextField - TextField formatado para o cabeçalho
+     */
+    private TextField getTextFieldCabecalho() {
+        TextField textField = new TextField();
+        textField.setEditable(false);
+        textField.prefWidth(90.0);
+        textField.prefHeight(30.0);
+        textField.setStyle("-fx-background-color: lightblue;"
+            + "-fx-border-color: black;"
+            + "-fx-font-weight: bold;"
+            + "-fx-alignment: center;");
+        
+        return textField;
+    }
+    
+    /**
+     * 
+     * @return TextField - TextField para uma classificação incorreta
+     */
+    private TextField getTextFieldAcerto() {
+        TextField textField = new TextField();
+        textField.setEditable(false);
+        textField.prefWidth(90.0);
+        textField.prefHeight(30.0);
+        textField.setStyle("-fx-border-color: black;"
+                + "-fx-font-weight: bold;"
+                + "-fx-alignment: center;"
+                + "-fx-background-color: lightgreen;");
+        
+        return textField;
+    }
+    
+    /**
+     * 
+     * @return TextField - TextField para uma classificação correta
+     */
+    private TextField getTextFieldErro() {
+        TextField textField = new TextField();
+        textField.setEditable(false);
+        textField.prefWidth(90.0);
+        textField.prefHeight(30.0);
+        textField.setStyle("-fx-border-color: black;"
+                + "-fx-alignment: center;");
 
+        return textField;
+    }
+    
     /**
      * Limpa os componentes da tela e retorna ao estado de teste
      *
@@ -667,14 +834,19 @@ public class PrincipalController implements Initializable {
     @FXML
     private void clkBtnCancelarTeste(MouseEvent event) {
         limparComponentesTeste();
-        estadoTeste();
+        estadoInicialTeste();
     }
 
     /**
      * Limpa os componentes da tela de testes.
      */
     private void limparComponentesTeste() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        txtCaminhoArquivoTeste.clear();
+        txtTotal.clear();
+        txtAcertos.clear();
+        txtErros.clear();
+        txtAcuracia.clear();
+        limparMatrizConfusao();
     }
 
 }

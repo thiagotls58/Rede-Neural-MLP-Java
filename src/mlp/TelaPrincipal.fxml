@@ -11,7 +11,11 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="611.0" prefWidth="1030.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mlp.PrincipalController">
@@ -221,6 +225,65 @@
                         </Button>
                      </children>
                   </HBox>
+                  <AnchorPane fx:id="pnResultadoTeste" layoutX="14.0" layoutY="117.0" prefHeight="456.0" prefWidth="1002.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="48.0" prefWidth="719.0" spacing="20.0">
+                           <children>
+                              <VBox>
+                                 <children>
+                                    <Label text="Total">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="txtTotal" editable="false" prefHeight="28.0" prefWidth="90.0" />
+                                 </children>
+                              </VBox>
+                              <VBox>
+                                 <children>
+                                    <Label text="Acertos">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="txtAcertos" editable="false" prefHeight="28.0" prefWidth="90.0" />
+                                 </children>
+                              </VBox>
+                              <VBox>
+                                 <children>
+                                    <Label text="Erros">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="txtErros" editable="false" prefHeight="28.0" prefWidth="90.0" />
+                                 </children>
+                              </VBox>
+                              <VBox>
+                                 <children>
+                                    <Label text="Acurácia">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <TextField fx:id="txtAcuracia" editable="false" prefHeight="28.0" prefWidth="90.0" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <GridPane fx:id="matrizConfusao" layoutX="40.0" layoutY="82.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" />
+                            <ColumnConstraints hgrow="SOMETIMES" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
+                            <RowConstraints vgrow="SOMETIMES" />
+                          </rowConstraints>
+                        </GridPane>
+                     </children>
+                  </AnchorPane>
                </children></AnchorPane>
       </content>
     </Tab>
