@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.chart.StackedAreaChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
@@ -29,6 +29,25 @@
                         <Font name="System Bold" size="30.0" />
                      </font>
                   </Label>
+                  <HBox layoutX="350.0" layoutY="7.0" spacing="20.0">
+                     <children>
+                        <Button fx:id="btnTreinar" mnemonicParsing="false" onMouseClicked="#clkBtnTreinar" style="-fx-background-color: lightblue;" text="Treinar">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btnIniciarTreino" mnemonicParsing="false" onMouseClicked="#clkBtnIniciarTreino" style="-fx-background-color: lightblue;" text="Iniciar Treino">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btnCancelarTreinamento" mnemonicParsing="false" onMouseClicked="#clkBtnCancelarTreinamento" style="-fx-background-color: #FF6352;" text="Cancelar">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
                   <HBox alignment="CENTER" layoutX="14.0" layoutY="52.0" prefHeight="46.0" prefWidth="982.0" spacing="20.0">
                      <children>
                         <AnchorPane fx:id="pnAtributos">
@@ -150,35 +169,16 @@
                               <Font size="14.0" />
                            </font>
                         </TextArea>
-                        <StackedAreaChart fx:id="graficoTreinamento" layoutX="402.0" layoutY="2.0" prefHeight="323.0" prefWidth="587.0" verticalGridLinesVisible="false">
+                        <LineChart fx:id="graficoTreinamento" horizontalGridLinesVisible="false" layoutX="397.0" prefHeight="314.0" prefWidth="596.0" verticalGridLinesVisible="false">
                           <xAxis>
-                            <NumberAxis label="Épocas" side="BOTTOM" />
+                            <NumberAxis label="Época" side="BOTTOM" />
                           </xAxis>
                           <yAxis>
-                            <NumberAxis autoRanging="false" label="Erro Médio" minorTickLength="0.0" side="LEFT" tickUnit="0.01" upperBound="0.16" />
+                            <NumberAxis label="Erro Médio" side="LEFT" />
                           </yAxis>
-                        </StackedAreaChart>
+                        </LineChart>
                      </children>
                   </AnchorPane>
-                  <HBox layoutX="350.0" layoutY="7.0" spacing="20.0">
-                     <children>
-                        <Button fx:id="btnTreinar" mnemonicParsing="false" onMouseClicked="#clkBtnTreinar" style="-fx-background-color: lightblue;" text="Treinar">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="btnIniciarTreino" mnemonicParsing="false" onMouseClicked="#clkBtnIniciarTreino" style="-fx-background-color: lightblue;" text="Iniciar Treino">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="btnCancelarTreinamento" mnemonicParsing="false" onMouseClicked="#clkBtnCancelarTreinamento" style="-fx-background-color: #FF6352;" text="Cancelar">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                     </children>
-                  </HBox>
                </children></AnchorPane>
       </content>
     </Tab>

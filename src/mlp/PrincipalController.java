@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
@@ -119,7 +121,7 @@ public class PrincipalController implements Initializable {
     @FXML
     private TextArea txtConsoleTreinamento;
     @FXML
-    private StackedAreaChart<?, ?> graficoTreinamento;
+    private LineChart<?, ?> graficoTreinamento;
     @FXML
     private Button btnCancelarTreinamento;
     @FXML
