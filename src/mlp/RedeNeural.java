@@ -74,7 +74,7 @@ public class RedeNeural {
      * vetor de entradas para calcular a rede
      */
     private double[] vetEntradas;
-    
+
     /**
      * List da sequência que as amostras serão calculadas
      */
@@ -105,34 +105,45 @@ public class RedeNeural {
      * Deve ser calculado ao fim de cada época
      */
     private double erroMedioDaRede;
-    
+
     /**
      * Número epocas que o treinamento foi realizado
      */
     private int totalEpocas;
-    
+
     /**
      * Matriz de confusão da rede
      */
     private int[][] matrizConfusao;
-    
+
     /**
      * Quantidade de dados para os testes
      */
     private int qtdDadosTeste;
-    
+
     /**
      * Total de acertos no teste da rede
      */
     private int totalAcertos;
-    
+
     /**
      * Porcentagem de acurácia da rede
      */
     private double acuracia;
-    
+
+    /**
+     * Lista de erros para ser utilizado no gráfico de treinamento.
+     */
+    private List<Double> errosDaRede;
+
+    /**
+     * Lista de épocas para ser utilizado no gráfico de treinamento.
+     */
+    private List<Integer> epocasDaRede;
+
     /**
      * Inicializa a rede neural mlp
+     *
      * @param nmrEntrada int - número de entradas da rede
      * @param nmrSaida int - número de neurônios na camada de saída da rede
      * @param nmrCamadaOculta int - número de neurônios na camada oculta da rede
@@ -163,13 +174,44 @@ public class RedeNeural {
 
     /**
      *
-     * @return FuncaoAtivacao - Retorna a função de ativação do cálculo de saída
-     * do neurônio
+     * @return List<Double> - Vetor de erros da rede
+     */
+    public List<Double> getErrosDaRede() {
+        return errosDaRede;
+    }
+
+    /**
+     *
+     * @return List<Integer> - Vetor de épocas da rede
+     */
+    public List<Integer> getEpocasDaRede() {
+        return epocasDaRede;
+    }
+
+    /**
+     * 
+     * @return double - Taxa de aprendizado da rede. 
+     */
+    public double getTaxaAprendizado() {
+        return taxaAprendizado;
+    }
+    
+    /**
+     * 
+     * @return FuncaoAtivacao - Função de ativação utilizada na rede.
      */
     public FuncaoAtivacao getFuncaoAtivacao() {
         return funcaoAtivacao;
     }
 
+    /**
+     * 
+     * @return double - Erro médio da rede.
+     */
+    public double getErroMedioDaRede() {
+        return erroMedioDaRede;
+    }
+    
     /**
      * Função de ativação Linear f(x) = x/10
      *
@@ -177,7 +219,7 @@ public class RedeNeural {
      * @return double - retorna a saída do neurônio
      */
     private double funcLinear(double x) {
-        return x/10.0;
+        return x / 10.0;
     }
 
     /**
@@ -187,7 +229,7 @@ public class RedeNeural {
      * @return double - retorna a derivada da função linear
      */
     private double funcLinearDerivada(double x) {
-        return 1.0/10.0;
+        return 1.0 / 10.0;
     }
 
     /**
@@ -197,7 +239,7 @@ public class RedeNeural {
      * @return double - retorna saída do neurônio
      */
     private double funcLogistica(double x) {
-        return (1.0 /(1.0 + Math.exp(-x)));
+        return 1.0 / (1.0 + Math.exp(-x));
     }
 
     /**
@@ -296,9 +338,9 @@ public class RedeNeural {
         System.arraycopy(matrizSaidasEsperadas, 0, saidaEsperada, 0, matrizSaidasEsperadas.length);
     }
 
-    
     /**
      * Calcula a função de ativação.
+     *
      * @param net double - net do neurônio
      * @return double - resultado da função de ativação
      */
@@ -317,9 +359,10 @@ public class RedeNeural {
         }
         return saida;
     }
-    
+
     /**
      * Calcula a derivada do net do neurônio.
+     *
      * @param net double - net do neurônio
      * @return double - resultado da cálculo da derivada.
      */
@@ -338,8 +381,6 @@ public class RedeNeural {
         }
         return derivada;
     }
-    
-    
 
     /**
      * Efetua o treinamento da rede neural
@@ -349,16 +390,18 @@ public class RedeNeural {
         int epocas = 0;
         int index;
 
-        vetEntradas = new double[nmrEntrada];
-        vetSaidas = new double[nmrNeuroniosSaida];
-
         if (amostrasTreinamento != null && saidaEsperada != null) {
+
+            vetEntradas = new double[nmrEntrada];
+            vetSaidas = new double[nmrNeuroniosSaida];
+            errosDaRede = new ArrayList<>();
+            epocasDaRede = new ArrayList<>();
+
             /**
              * Enquanto não atingir o limite de erro, ou o limite de épocas
              */
             while ((erroMedioDaRede > limiteErro) && (epocas < limiteEpocas)) {
                 erroDaRede = 0.0;
-                epocas++;
                 SortearSequencia();
                 //Percorrer todo o conjunto de amostras
                 for (int i = 0; i < amostrasTreinamento.length; i++) {
@@ -367,13 +410,16 @@ public class RedeNeural {
                     System.arraycopy(amostrasTreinamento[index], 0, vetEntradas, 0,
                             amostrasTreinamento[index].length); // copiamos os dados de entrada para o vetor entradas
                     System.arraycopy(saidaEsperada[index], 0, vetSaidas, 0, saidaEsperada[index].length); //copiamos os dados de resultado esperado para vetSaidas
-                    
+
                     propagar();
                     retropropagar();
                     calcularErroDaRede();
                 }
-                
+
+                epocas++;
+                epocasDaRede.add(epocas);
                 calcularErroMedioDaRede();
+                errosDaRede.add(erroMedioDaRede);
                 
                 System.out.println("Treinando... época: " + epocas + ", erro: " + erroMedioDaRede);
             }
@@ -391,7 +437,7 @@ public class RedeNeural {
             System.out.println(printarMatrizDouble(pesosCamadaOculta));
         }
     }
-    
+
     public void testar(double[][] dadosTeste, double[][] saidasEsperadas) {
 
         int posCorreta;
@@ -403,14 +449,14 @@ public class RedeNeural {
         totalAcertos = 0;
         acuracia = 0.0;
         if (dadosTeste != null && saidasEsperadas != null) {
-            
+
             matrizConfusao = new int[nmrClasses][nmrClasses];
-            for(int i = 0; i < nmrClasses; i++) {
+            for (int i = 0; i < nmrClasses; i++) {
                 for (int j = 0; j < nmrClasses; j++) {
                     matrizConfusao[i][j] = 0;
                 }
             }
-            
+
             //Percorrer todo o conjunto de amostras
             for (int i = 0; i < qtdDadosTeste; i++) {
 
@@ -421,15 +467,16 @@ public class RedeNeural {
                 propagar();
                 posCorreta = encontrarPosCorreta(vetSaidas);
                 posCalculada = encontrarPosCalculada(camadaSaida);
-                
-                if (posCorreta == posCalculada)
+
+                if (posCorreta == posCalculada) {
                     totalAcertos++;
-                
+                }
+
                 matrizConfusao[posCorreta][posCalculada] += 1;
-                
+
             }
-            
-            acuracia = ((double)totalAcertos/qtdDadosTeste) * 100.0;
+
+            acuracia = ((double) totalAcertos / qtdDadosTeste) * 100.0;
         }
     }
 
@@ -442,7 +489,7 @@ public class RedeNeural {
         calcularNetCamadaSaida();
         calcularSaidaCamadaSaida();
     }
-    
+
     /**
      * Faz a retropropagação da rede.
      */
@@ -459,7 +506,7 @@ public class RedeNeural {
     private void calcularNetCamadaOculta() {
         double net;
         double resultado;
-        
+
         for (int i = 0; i < nmrNeuroniosOculta; i++) {
             net = 0.0;
             for (int j = 0; j < nmrEntrada; j++) {
@@ -487,7 +534,7 @@ public class RedeNeural {
     private void calcularNetCamadaSaida() {
         double net;
         double resultado;
-        
+
         for (int i = 0; i < nmrNeuroniosSaida; i++) {
             net = 0.0;
             for (int j = 0; j < nmrNeuroniosOculta; j++) {
@@ -561,7 +608,7 @@ public class RedeNeural {
         double erro;
         double derivada;
         double gradiente;
-        
+
         // calcula o erro dos neuronios da camada oculta
         for (int i = 0; i < nmrNeuroniosOculta; i++) {
             neuronio = camadaOculta.get(i);
@@ -571,9 +618,9 @@ public class RedeNeural {
                 gradiente = camadaSaida.get(j).getErroGradiente();
                 erro += gradiente * pesosCamadaOculta[i][j];
             }
-            
+
             erro = erro * derivada;
-            
+
             neuronio.setErroGradiente(erro);
         }
     }
@@ -624,7 +671,7 @@ public class RedeNeural {
         listSequencia = new ArrayList<>();
         int totalAmostras = amostrasTreinamento.length;
         int numeroSorteado;
-        
+
         for (int i = 0; i < totalAmostras; i++) {
             numeroSorteado = random.nextInt(totalAmostras);
             while (listSequencia.contains(numeroSorteado)) {
@@ -636,19 +683,22 @@ public class RedeNeural {
 
     /**
      * Encontra a posição (classe) correta para a entrada.
+     *
      * @param vetSaidas double[][] - vetor de saida esperada.
      * @return int - posicação encotrada
      */
     private int encontrarPosCorreta(double[] vetSaidas) {
         for (int pos = 0; pos < vetSaidas.length; pos++) {
-            if (vetSaidas[pos] == 1.0)
+            if (vetSaidas[pos] == 1.0) {
                 return pos;
+            }
         }
         return -1;
     }
 
     /**
      * Encontra a posição (classe) calculada na rede.
+     *
      * @param camadaSaida List<NeuronioSaida> - camada de saída da rede
      * @return int - posição encontrada
      */
@@ -656,17 +706,17 @@ public class RedeNeural {
         double maior = 0.0;
         int posicao = -1;
         NeuronioSaida neuronio;
-        for(int pos = 0; pos < camadaSaida.size(); pos++) {
+        for (int pos = 0; pos < camadaSaida.size(); pos++) {
             neuronio = camadaSaida.get(pos);
             if (neuronio.getSaida() > maior) {
                 maior = neuronio.getSaida();
                 posicao = pos;
             }
         }
-        
+
         return posicao;
     }
-    
+
     /**
      * Constrói uma String com os dados da matriz.
      *
@@ -689,7 +739,7 @@ public class RedeNeural {
         }
         return str;
     }
-    
+
     /**
      * Constrói uma String com os dados da matriz.
      *
@@ -718,9 +768,10 @@ public class RedeNeural {
         }
         return str;
     }
-    
+
     /**
      * Contrói um gráfico da matriz de confusão.
+     *
      * @param matriz int[][] - dados para o gráfico
      * @return String - Gráfico em formato texto
      */
@@ -730,13 +781,13 @@ public class RedeNeural {
         double percentual;
         int classe;
         int[] vetorSum = new int[matriz.length];
-        
+
         for (int i = 0; i < matriz.length; i++) {
             for (int j = 0; j < matriz[0].length; j++) {
                 vetorSum[i] += matriz[i][j];
             }
         }
-        
+
         for (int i = 0; i < matriz.length; i++) {
             classe = i + 1;
             str += "classe " + classe + ": ";
@@ -752,7 +803,7 @@ public class RedeNeural {
             }
             str += "\n";
         }
-        
+
         return str;
     }
 
@@ -775,7 +826,7 @@ public class RedeNeural {
 
         return str;
     }
-    
+
     public String resultadoTeste() {
         String str = "";
         str += "Fim dos testes...\n";
@@ -790,7 +841,7 @@ public class RedeNeural {
         str += "\n";
         str += "Gráfico\n";
         str += construirGrafico(matrizConfusao);
-        
+
         return str;
     }
 

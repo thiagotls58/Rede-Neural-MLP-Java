@@ -8,9 +8,13 @@ package mlp;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.chart.StackedAreaChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
@@ -27,12 +31,41 @@ import javafx.stage.FileChooser;
  */
 public class PrincipalController implements Initializable {
 
-    @FXML
-    private AnchorPane pnArquivo;
-    @FXML
-    private TextField txtCaminhoArquivo;
-    @FXML
-    private Button btnProcurar;
+    /**
+     * Objeto da rede neural.
+     */
+    RedeNeural mlp;
+
+    /**
+     * Lista de parâmetros para ser utilizado na normalização dos dados.
+     */
+    double[][] parametros;
+
+    /**
+     * Lista de erros para ser utilizado no gráfico de treinamento.
+     */
+    private List<Double> errosDaRede;
+
+    /**
+     * Lista de épocas para ser utilizado no gráfico de treinamento.
+     */
+    private List<Integer> epocasDaRede;
+
+    /**
+     * Dados para preencher o gráfico de treinamento.
+     */
+    private XYChart.Series dadosTreinamento;
+
+    /**
+     * Contém todos os dados de cada treinamento realizado.
+     */
+    private List<XYChart.Series> listaDadosDoGraficoTreinamento;
+
+    /**
+     * Lista de treinamentos realizado.
+     */
+    private List<Treino> treinamentos;
+
     @FXML
     private AnchorPane pnCriterioParada;
     @FXML
@@ -56,15 +89,11 @@ public class PrincipalController implements Initializable {
     @FXML
     private TextField txtClasses;
     @FXML
-    private TextArea txtSaidas;
-    @FXML
     private Button btnIniciarTreino;
     @FXML
     private Button btnTestar;
     @FXML
     private Button btnIniciarTeste;
-    @FXML
-    private Button btnCancelar;
     @FXML
     private TextField txtErro;
     @FXML
@@ -83,11 +112,42 @@ public class PrincipalController implements Initializable {
     private ToggleGroup grupoNormalizar;
     @FXML
     private RadioButton rdNao;
-    /**
-     * Objeto da rede neural.
-     */
-    RedeNeural mlp;
-    double[][] parametros;
+    @FXML
+    private Button btnProcurarArqTreino;
+    @FXML
+    private TextArea txtConsoleTreinamento;
+    @FXML
+    private StackedAreaChart<?, ?> graficoTreinamento;
+    @FXML
+    private Button btnCancelarTreinamento;
+    @FXML
+    private AnchorPane pnArquivoTeste;
+    @FXML
+    private TextField txtCaminhoArquivoTeste;
+    @FXML
+    private Button btnProcurarArqTeste;
+    @FXML
+    private Button btnCancelarTeste;
+    @FXML
+    private TextField txtCaminhoArquivoTreino;
+    @FXML
+    private AnchorPane pnTreinamento;
+    @FXML
+    private AnchorPane pnTeste;
+    @FXML
+    private AnchorPane pnAtributos;
+    @FXML
+    private AnchorPane pnClasses;
+    @FXML
+    private AnchorPane pnNeuronios;
+    @FXML
+    private AnchorPane pnNormalizacao;
+    @FXML
+    private AnchorPane pnArquivoTreino;
+    @FXML
+    private AnchorPane pnResultadosTreinamento;
+    @FXML
+    private TextArea txtResultadosTreinamentos;
 
     /**
      * Initializes the controller class.
@@ -95,7 +155,83 @@ public class PrincipalController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-        estadoInicial();
+        estadoInicialTreinamento();
+    }
+
+    /*--------------------------------------------------------------------------------------------------------*/
+ /*---------------------------- Parte de Treinamento da rede neural ---------------------------------------*/
+ /*--------------------------------------------------------------------------------------------------------*/
+    /**
+     * Define o estado inicial da aplicação.
+     */
+    private void estadoInicialTreinamento() {
+        listaDadosDoGraficoTreinamento = new ArrayList<>();
+        treinamentos = new ArrayList<>();
+
+        pnAtributos.setDisable(true);
+        pnClasses.setDisable(true);
+        pnNeuronios.setDisable(true);
+        pnNormalizacao.setDisable(true);
+        pnArquivoTreino.setDisable(true);
+        pnCriterioParada.setDisable(true);
+        pnTaxaAprendazagem.setDisable(true);
+        pnFuncaoAtivacao.setDisable(true);
+        pnResultadosTreinamento.setDisable(true);
+        btnTreinar.setDisable(false);
+        btnIniciarTreino.setDisable(true);
+        pnTeste.setDisable(true);
+    }
+
+    /**
+     * Inicia fase de treinamento da rede.
+     *
+     * @param event
+     */
+    @FXML
+    private void clkBtnTreinar(MouseEvent event) {
+        estadoTreino();
+    }
+
+    /**
+     * Configura os componentes da tela para fazer o treinamento da rede.
+     */
+    private void estadoTreino() {
+        pnAtributos.setDisable(false);
+        pnClasses.setDisable(false);
+        pnNeuronios.setDisable(false);
+        pnNormalizacao.setDisable(false);
+        pnArquivoTreino.setDisable(false);
+        pnCriterioParada.setDisable(false);
+        pnTaxaAprendazagem.setDisable(false);
+        pnFuncaoAtivacao.setDisable(false);
+        pnResultadosTreinamento.setDisable(true);
+        btnIniciarTreino.setDisable(false);
+        btnTreinar.setDisable(true);
+        pnTeste.setDisable(true);
+    }
+
+    /**
+     * Quando o radio button Personalizado for selecionado, desabilita a text
+     * field para o usuário informar a quantidade de neurônios desejado.
+     *
+     * @param event
+     */
+    @FXML
+    private void clkRdPersonalizado(MouseEvent event) {
+        txtQtdNeuronios.setDisable(false);
+        txtQtdNeuronios.requestFocus();
+    }
+
+    /**
+     * Quando for selecionado, limpa a text field da quantidade de neurônios, e
+     * em seguida desabilita a mesma.
+     *
+     * @param event
+     */
+    @FXML
+    private void clkRdPadrao(MouseEvent event) {
+        txtQtdNeuronios.clear();
+        txtQtdNeuronios.setDisable(true);
     }
 
     /**
@@ -105,24 +241,14 @@ public class PrincipalController implements Initializable {
      * @param event
      */
     @FXML
-    private void clkBtnProcurar(MouseEvent event) {
+    private void clkBtnProcurarArqTreino(MouseEvent event) {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files", "*.csv");
         fileChooser.getExtensionFilters().add(extFilter);
 
         File file = fileChooser.showOpenDialog(null);
         String caminho = file.getAbsolutePath();
-        txtCaminhoArquivo.setText(caminho);
-
-    }
-
-    /**
-     * Inicia fase de treinamento da rede.
-     * @param event 
-     */
-    @FXML
-    private void clkBtnTreinar(MouseEvent event) {
-        estadoTreino();
+        txtCaminhoArquivoTreino.setText(caminho);
     }
 
     /**
@@ -132,118 +258,307 @@ public class PrincipalController implements Initializable {
      */
     @FXML
     private void clkBtnIniciarTreino(MouseEvent event) {
-        
-        int nmrEntrada = Integer.parseInt(txtAtributos.getText());
-        int nmrSaida = Integer.parseInt(txtClasses.getText());
-        
-        int nmrCamadaOculta = 0;
-        if(rdPadrao.isSelected())
-            nmrCamadaOculta = (nmrEntrada + nmrSaida) / 2;
-        else if (rdPersonalizado.isSelected())
-            nmrCamadaOculta = Integer.parseInt(txtQtdNeuronios.getText());
-        
-        double limiteErro = Double.parseDouble(txtErro.getText());
-        int limiteEpocas = Integer.parseInt(txtEpocas.getText());
-        double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
-        Util util = new Util();
 
-        mlp = new RedeNeural(nmrEntrada, nmrSaida, nmrCamadaOculta, limiteErro, limiteEpocas, taxaAprendizado);
+        if (validarDadosTreinamento()) {
+            int nmrEntrada = Integer.parseInt(txtAtributos.getText());
+            int nmrSaida = Integer.parseInt(txtClasses.getText());
 
-        String caminhoArquivo = txtCaminhoArquivo.getText();
-        ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
-        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nmrEntrada, nmrSaida);
-        double[][] matrizAmostras = dadosConvertidos.get(0);
-        double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
+            int nmrCamadaOculta = 0;
+            if (rdPadrao.isSelected()) {
+                nmrCamadaOculta = (nmrEntrada + nmrSaida) / 2;
+            } else if (rdPersonalizado.isSelected()) {
+                nmrCamadaOculta = Integer.parseInt(txtQtdNeuronios.getText());
+            }
+
+            double limiteErro = Double.parseDouble(txtErro.getText());
+            int limiteEpocas = Integer.parseInt(txtEpocas.getText());
+            double taxaAprendizado = Double.parseDouble(txtTaxaAprendizagem.getText());
+            Util util = new Util();
+
+            mlp = new RedeNeural(nmrEntrada, nmrSaida, nmrCamadaOculta, limiteErro, limiteEpocas, taxaAprendizado);
+
+            String caminhoArquivo = txtCaminhoArquivoTreino.getText();
+            ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
+            ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nmrEntrada, nmrSaida);
+            double[][] matrizAmostras = dadosConvertidos.get(0);
+            double[][] matrizSaidasEsperadas = dadosConvertidos.get(1);
+
+            if (rdSim.isSelected()) {
+                parametros = util.obterParametrosNormalizacao(matrizAmostras);
+                matrizAmostras = util.normalizarDados(matrizAmostras, parametros);
+            }
+
+            mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nmrEntrada, nmrSaida);
+
+            if (rdLinear.isSelected()) {
+                mlp.setFuncaoAtivacao(FuncaoAtivacao.LINEAR);
+            } else if (rdLogistica.isSelected()) {
+                mlp.setFuncaoAtivacao(FuncaoAtivacao.LOGISTICA);
+            } else {
+                mlp.setFuncaoAtivacao(FuncaoAtivacao.HIPERBOLICA);
+            }
+
+            limparConsoleTreinamento();
+            mlp.treinar();
+            txtConsoleTreinamento.appendText(mlp.resultadoTreinamento());
+            preencherResultadosTreinamento();
+            preencherGraficoTreinamento();
+            estadoInicialTeste();
+        }
+    }
+
+    /**
+     * Valida todos os campos da tela de treinamento.
+     *
+     * @return boolean - true todos os dados estiver corrtos, ou false se tiver
+     * algo incorreto
+     */
+    private boolean validarDadosTreinamento() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        if (txtAtributos.getText().isEmpty()) {
+            alert.setContentText("Por favor, informe o número de atributos do arquivo de treinamento!");
+            alert.showAndWait();
+            txtAtributos.requestFocus();
+            return false;
+        }
+
+        try {
+            int atributos = Integer.parseInt(txtAtributos.getText());
+        } catch (Exception e) {
+            alert.setContentText("Por favor, informe o número de atributos do arquivo de treinamento corretamente!");
+            alert.showAndWait();
+            txtAtributos.requestFocus();
+            return false;
+        }
+
+        if (txtClasses.getText().isEmpty()) {
+            alert.setContentText("Por favor, informe o número de classes do arquivo de treinamento!");
+            alert.showAndWait();
+            txtClasses.requestFocus();
+            return false;
+        }
+
+        try {
+            int classes = Integer.parseInt(txtClasses.getText());
+        } catch (Exception e) {
+            alert.setContentText("Por favor, informe o número de classes do arquivo de treinamento corretamente!");
+            alert.showAndWait();
+            txtClasses.requestFocus();
+            return false;
+        }
+
+        boolean radioBtnPadrao = rdPadrao.isSelected();
+        boolean radioBtnPersonalizado = rdPersonalizado.isSelected();
+        if (!radioBtnPadrao && !radioBtnPersonalizado) {
+            alert.setContentText("Por favor, informe o número de neurônios da camada oculta!");
+            alert.showAndWait();
+            pnNeuronios.requestFocus();
+            return false;
+        }
+
+        if (radioBtnPersonalizado) {
+            if (txtQtdNeuronios.getText().isEmpty()) {
+                alert.setContentText("Por favor, informe a quantidade de neurônios da camada oculta!");
+                alert.showAndWait();
+                txtQtdNeuronios.requestFocus();
+                return false;
+            }
+
+            try {
+                int qtdNeuronios = Integer.parseInt(txtQtdNeuronios.getText());
+            } catch (Exception e) {
+                alert.setContentText("Por favor, informe a quantidade de neurônios da camada oculta corretamente!");
+                alert.showAndWait();
+                txtQtdNeuronios.requestFocus();
+                return false;
+            }
+        }
+
+        boolean radioBtnSim = rdSim.isSelected();
+        boolean radioBtnNao = rdNao.isSelected();
+        if (!radioBtnSim && !radioBtnNao) {
+            alert.setContentText("Por favor, informe o tipo de normalização dos dados!");
+            alert.showAndWait();
+            pnNormalizacao.requestFocus();
+            return false;
+        }
+
+        if (txtCaminhoArquivoTreino.getText().isEmpty()) {
+            alert.setContentText("Por favor, selecione o arquivo de treinamento!");
+            alert.showAndWait();
+            btnProcurarArqTreino.requestFocus();
+            return false;
+        }
+
+        if (txtErro.getText().isEmpty()) {
+            alert.setContentText("Por favor, informe o limite de erro da rede!");
+            alert.showAndWait();
+            txtErro.requestFocus();
+            return false;
+        }
+
+        try {
+            double erro = Double.parseDouble(txtErro.getText());
+        } catch (Exception e) {
+            alert.setContentText("Por favor, informe o limite de erro da rede corretamente!");
+            alert.showAndWait();
+            txtErro.requestFocus();
+            return false;
+        }
+
+        if (txtEpocas.getText().isEmpty()) {
+            alert.setContentText("Por favor, informe o limite de épocas da rede!");
+            alert.showAndWait();
+            txtEpocas.requestFocus();
+            return false;
+        }
+
+        try {
+            double epocas = Double.parseDouble(txtEpocas.getText());
+        } catch (Exception e) {
+            alert.setContentText("Por favor, informe o limite de épocas da rede corretamente!");
+            alert.showAndWait();
+            txtEpocas.requestFocus();
+            return false;
+        }
+
+        if (txtTaxaAprendizagem.getText().isEmpty()) {
+            alert.setContentText("Por favor, informe a taxa de aprendizado da rede!");
+            alert.showAndWait();
+            txtTaxaAprendizagem.requestFocus();
+            return false;
+        }
+
+        try {
+            double taxa = Double.parseDouble(txtTaxaAprendizagem.getText());
+        } catch (Exception e) {
+            alert.setContentText("Por favor, informe a taxa de aprendizado da rede corretamente!");
+            alert.showAndWait();
+            txtTaxaAprendizagem.requestFocus();
+            return false;
+        }
+
+        boolean radioBtnLinear = rdLinear.isSelected();
+        boolean radioBtnLogistica = rdLogistica.isSelected();
+        boolean radioBtnHiperbolica = rdHiperbolica.isSelected();
+        if (!radioBtnLinear && !radioBtnLogistica && !radioBtnHiperbolica) {
+            alert.setContentText("Por favor, informe a função de ativação da rede!");
+            alert.showAndWait();
+            pnFuncaoAtivacao.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Limpa a text area de treinamento.
+     */
+    private void limparConsoleTreinamento() {
+        pnResultadosTreinamento.setDisable(false);
+        txtConsoleTreinamento.setDisable(false);
+        txtConsoleTreinamento.clear();
+    }
+
+    /**
+     * preenche a text area de resultados dos treinamentos.
+     */
+    private void preencherResultadosTreinamento() {
+        limparResultadosTreinamentos();
         
-        if(rdSim.isSelected()) {
-            parametros = util.obterParametrosNormalizacao(matrizAmostras);
-            matrizAmostras = util.normalizarDados(matrizAmostras, parametros);
+        Treino treino = new Treino();
+        treino.setId(treinamentos.size() + 1);
+        treino.setTaxaAprendizado(mlp.getTaxaAprendizado());
+        treino.setAtivacao(mlp.getFuncaoAtivacao());
+        treino.setErro(mlp.getErroMedioDaRede());
+        treinamentos.add(treino);
+        if (treinamentos.size() > 1) {
+            ordenarTreinamentos();
         }
         
-        mlp.setDadosTreinamento(matrizAmostras, matrizSaidasEsperadas, dadosArquivo.size(), nmrEntrada, nmrSaida);
-
-        if (rdLinear.isSelected()) {
-            mlp.setFuncaoAtivacao(FuncaoAtivacao.LINEAR);
-        } else if (rdLogistica.isSelected()) {
-            mlp.setFuncaoAtivacao(FuncaoAtivacao.LOGISTICA);
-        } else {
-            mlp.setFuncaoAtivacao(FuncaoAtivacao.HIPERBOLICA);
+        for (Treino t : treinamentos) {
+            txtResultadosTreinamentos.appendText(t.toString() + "\n");
         }
-
-        limparConsole();
-        mlp.treinar();
-        txtSaidas.appendText(mlp.resultadoTreinamento());
-        btnTestar.setDisable(false);
     }
-
+    
     /**
-     * Inicia fase de testes da rede
-     * @param event 
+     * Ordena a lista de treinamentos do menor erro, para o maior erro.
      */
-    @FXML
-    private void clkBtnTestar(MouseEvent event) {
-        estadoTeste();
-    }
-
-    @FXML
-    private void clkBtnIniciarTeste(MouseEvent event) {
-        Util util = new Util();
-        int nEntrada = Integer.parseInt(txtAtributos.getText());
-        int nSaida = Integer.parseInt(txtClasses.getText());
+    private void ordenarTreinamentos() {
         
-        String caminhoArquivo = txtCaminhoArquivo.getText();
-        ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
-        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
+        List<Treino> list = new ArrayList<>();
         
-        double[][] dadosTeste = dadosConvertidos.get(0);
-        double[][] SaidasEsperadas = dadosConvertidos.get(1);
-        
-        if(rdSim.isSelected()) {
-            // normaliza os dados.
-            dadosTeste = util.normalizarDados(dadosTeste, parametros);
+        for (int i = 0; i < treinamentos.size() - 1; i++) {
+            for (int j = i+1; j < treinamentos.size(); j++) {
+                Treino ti = treinamentos.get(i);
+                Treino tj = treinamentos.get(j);
+                
+                if (tj.getErro() < ti.getErro()) {
+                    treinamentos.set(i, tj);
+                    treinamentos.set(j, ti);
+                }
+            }
         }
-        
-        limparConsole();
-        mlp.testar(dadosTeste, SaidasEsperadas);
-        txtSaidas.appendText(mlp.resultadoTeste());
+            
     }
 
     /**
-     * Limpa todos os componentes da tela, e retorna para o estado inicial
-     * @param event 
+     * Limpa a text area de resultados dos treinamentos.
+     */
+    private void limparResultadosTreinamentos() {
+        pnResultadosTreinamento.setDisable(false);
+        txtResultadosTreinamentos.setDisable(false);
+        txtResultadosTreinamentos.clear();
+    }
+
+    /**
+     * Preenche o gráfico de treinamento com os valores de épocas e erros da
+     * rede neural.
+     */
+    private void preencherGraficoTreinamento() {
+        double erro;
+        int epoca;
+        int treino = listaDadosDoGraficoTreinamento.size() + 1;
+        errosDaRede = mlp.getErrosDaRede();
+        epocasDaRede = mlp.getEpocasDaRede();
+        dadosTreinamento = new XYChart.Series();
+
+        for (int i = 0; i < errosDaRede.size(); i++) {
+            erro = errosDaRede.get(i);
+            epoca = epocasDaRede.get(i);
+            dadosTreinamento.getData().add(new XYChart.Data(epoca, erro));
+        }
+        dadosTreinamento.setName("Treino" + treino);
+        listaDadosDoGraficoTreinamento.add(dadosTreinamento);
+        graficoTreinamento.getData().addAll(dadosTreinamento);
+    }
+
+    /**
+     * Limpa o gráfico de treinamento.
+     */
+    private void limparGraficoTreinameto() {
+        pnResultadosTreinamento.setDisable(false);
+        for (int i = 0; i < listaDadosDoGraficoTreinamento.size(); i++) {
+            XYChart.Series serie = listaDadosDoGraficoTreinamento.get(i);
+            graficoTreinamento.getData().remove(serie);
+        }
+    }
+
+    /**
+     * Limpa os componentes da tela, e retorna ao estado inicial.
+     *
+     * @param event
      */
     @FXML
-    private void clkBtnCancelar(MouseEvent event) {
-        limparComponentes();
-        estadoInicial();
+    private void clkBtnCancelarTreinamento(MouseEvent event) {
+        limparComponentesTreinamento();
+        estadoInicialTreinamento();
     }
 
     /**
-     * Define estado inicial dos componentes da aplicação.
+     * Limpa os componentes da tela de treinamento.
      */
-    private void estadoInicial() {
-        txtAtributos.setDisable(true);
-        txtClasses.setDisable(true);
-        rdPadrao.setDisable(true);
-        rdPersonalizado.setDisable(true);
-        txtQtdNeuronios.setDisable(true);
-        rdSim.setDisable(true);
-        rdNao.setDisable(true);
-        pnArquivo.setDisable(true);
-        pnCriterioParada.setDisable(true);
-        pnTaxaAprendazagem.setDisable(true);
-        pnFuncaoAtivacao.setDisable(true);
-        txtSaidas.setDisable(true);
-        btnTreinar.setDisable(false);
-        btnIniciarTreino.setDisable(true);
-        btnTestar.setDisable(true);
-        btnIniciarTeste.setDisable(true);
-    }
-
-    /**
-     * Limpa todos os componentes da tela.
-     */
-    private void limparComponentes() {
+    private void limparComponentesTreinamento() {
         txtAtributos.clear();
         txtClasses.clear();
         rdPadrao.setSelected(false);
@@ -251,8 +566,8 @@ public class PrincipalController implements Initializable {
         txtQtdNeuronios.clear();
         rdSim.setSelected(false);
         rdNao.setSelected(false);
-        
-        txtCaminhoArquivo.clear();
+
+        txtCaminhoArquivoTreino.clear();
 
         txtErro.clear();
         txtEpocas.clear();
@@ -263,68 +578,103 @@ public class PrincipalController implements Initializable {
         rdLogistica.setSelected(false);
         rdHiperbolica.setSelected(false);
 
-        txtSaidas.clear();
+        limparConsoleTreinamento();
+        limparResultadosTreinamentos();
+        limparGraficoTreinameto();
+    }
+
+    /*--------------------------------------------------------------------------------------------------------*/
+ /*---------------------------- Parte de Testes da rede neural --------------------------------------------*/
+ /*--------------------------------------------------------------------------------------------------------*/
+    /**
+     * Configura a tela para o estado inicial de teste.
+     */
+    private void estadoInicialTeste() {
+        pnTeste.setDisable(false);
+        pnArquivoTeste.setDisable(true);
+        btnIniciarTeste.setDisable(true);
     }
 
     /**
-     * Configura os componentes da tela para fazer o treinamento da rede.
+     * Inicia fase de testes da rede
+     *
+     * @param event
      */
-    private void estadoTreino() {
-        txtAtributos.setDisable(false);
-        txtClasses.setDisable(false);
-        rdPadrao.setDisable(false);
-        rdPersonalizado.setDisable(false);
-        rdSim.setDisable(false);
-        rdNao.setDisable(false);
-        pnArquivo.setDisable(false);
-        pnCriterioParada.setDisable(false);
-        pnTaxaAprendazagem.setDisable(false);
-        pnFuncaoAtivacao.setDisable(false);
-        txtSaidas.setDisable(false);
-        btnTreinar.setDisable(true);
-        btnIniciarTreino.setDisable(false);
-        btnTestar.setDisable(true);
-        btnIniciarTeste.setDisable(true);
+    @FXML
+    private void clkBtnTestar(MouseEvent event) {
+        estadoTeste();
     }
 
     /**
      * Configura os componentes da tela para testar a rede.
      */
     private void estadoTeste() {
-        txtAtributos.setDisable(true);
-        txtClasses.setDisable(true);
-        rdPadrao.setDisable(true);
-        rdPersonalizado.setDisable(true);
-        txtQtdNeuronios.setDisable(true);
-        rdSim.setDisable(true);
-        rdNao.setDisable(true);
-        pnArquivo.setDisable(false);
-        pnCriterioParada.setDisable(true);
-        pnTaxaAprendazagem.setDisable(true);
-        pnFuncaoAtivacao.setDisable(true);
-        txtSaidas.setDisable(false);
-        txtSaidas.clear();
-        btnTreinar.setDisable(true);
-        btnIniciarTreino.setDisable(true);
-        btnTestar.setDisable(true);
+        pnTreinamento.setDisable(true);
+        pnArquivoTeste.setDisable(false);
         btnIniciarTeste.setDisable(false);
-        btnProcurar.requestFocus();
+
     }
 
+    /**
+     * Este método permite ao usuário selecionar o arquivo do tipo CSV para
+     * efetuar o teste da rede neural.
+     *
+     * @param event
+     */
     @FXML
-    private void clkRdPersonalizado(MouseEvent event) {
-        txtQtdNeuronios.setDisable(false);
-        txtQtdNeuronios.requestFocus();
+    private void clkBtnProcurarArqTeste(MouseEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("CSV files", "*.csv");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        File file = fileChooser.showOpenDialog(null);
+        String caminho = file.getAbsolutePath();
+        txtCaminhoArquivoTeste.setText(caminho);
     }
 
+    /**
+     * Inicia a fase de testes da rede neural.
+     *
+     * @param event
+     */
     @FXML
-    private void clkRdPadrao(MouseEvent event) {
-        txtQtdNeuronios.setDisable(true);
+    private void clkBtnIniciarTeste(MouseEvent event) {
+        Util util = new Util();
+        int nEntrada = Integer.parseInt(txtAtributos.getText());
+        int nSaida = Integer.parseInt(txtClasses.getText());
+
+        String caminhoArquivo = txtCaminhoArquivoTeste.getText();
+        ArrayList<String[]> dadosArquivo = new Arquivo().obterDados(caminhoArquivo);
+        ArrayList<double[][]> dadosConvertidos = util.converterDados(dadosArquivo, nEntrada, nSaida);
+
+        double[][] dadosTeste = dadosConvertidos.get(0);
+        double[][] SaidasEsperadas = dadosConvertidos.get(1);
+
+        if (rdSim.isSelected()) {
+            // normaliza os dados.
+            dadosTeste = util.normalizarDados(dadosTeste, parametros);
+        }
+
+        mlp.testar(dadosTeste, SaidasEsperadas);
+        //txtSaidas.appendText(mlp.resultadoTeste());
     }
 
-    private void limparConsole() {
-        txtSaidas.setDisable(false);
-        txtSaidas.clear();
+    /**
+     * Limpa os componentes da tela e retorna ao estado de teste
+     *
+     * @param event
+     */
+    @FXML
+    private void clkBtnCancelarTeste(MouseEvent event) {
+        limparComponentesTeste();
+        estadoTeste();
+    }
+
+    /**
+     * Limpa os componentes da tela de testes.
+     */
+    private void limparComponentesTeste() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

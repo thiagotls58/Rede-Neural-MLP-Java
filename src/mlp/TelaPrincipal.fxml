@@ -1,134 +1,228 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.StackedAreaChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane id="AnchorPane" prefHeight="620.0" prefWidth="762.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mlp.PrincipalController">
-   <children>
-      <Label layoutX="243.0" layoutY="4.0" text="Rede Neural MLP">
-         <font>
-            <Font name="System Bold" size="36.0" />
-         </font>
-      </Label>
-      <Label layoutX="29.0" layoutY="74.0" text="Nº Atributos">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="200.0" layoutY="75.0" text="Nº Classes">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="349.0" layoutY="64.0" text="Nº Neurônios Camada Oculta">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <Label layoutX="578.0" layoutY="65.0" text="Normalizar Dados?">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Label>
-      <TextField fx:id="txtAtributos" layoutX="120.0" layoutY="72.0" prefHeight="25.0" prefWidth="61.0" />
-      <TextField fx:id="txtClasses" layoutX="274.0" layoutY="73.0" prefHeight="25.0" prefWidth="61.0" />
-      <TextField fx:id="txtQtdNeuronios" layoutX="517.0" layoutY="81.0" prefHeight="25.0" prefWidth="30.0" />
-      <RadioButton fx:id="rdPadrao" layoutX="349.0" layoutY="86.0" mnemonicParsing="false" onMouseClicked="#clkRdPadrao" text="Padrão">
-         <toggleGroup>
-            <ToggleGroup fx:id="grupoNumNeuronios" />
-         </toggleGroup>
-      </RadioButton>
-      <RadioButton fx:id="rdPersonalizado" layoutX="412.0" layoutY="87.0" mnemonicParsing="false" onMouseClicked="#clkRdPersonalizado" text="Personalizado" toggleGroup="$grupoNumNeuronios" />
-      <AnchorPane fx:id="pnArquivo" layoutX="24.0" layoutY="103.0" prefHeight="63.0" prefWidth="715.0">
-         <children>
-            <Label layoutY="1.0" text="Selecione o arquivo" />
-            <TextField fx:id="txtCaminhoArquivo" editable="false" layoutY="22.0" prefHeight="29.0" prefWidth="597.0" />
-            <Button fx:id="btnProcurar" layoutX="605.0" layoutY="20.0" mnemonicParsing="false" onMouseClicked="#clkBtnProcurar" prefHeight="30.0" prefWidth="112.0" text="Procurar">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Button>
-         </children>
-      </AnchorPane>
-      <AnchorPane fx:id="pnCriterioParada" layoutX="27.0" layoutY="166.0" prefHeight="81.0" prefWidth="211.0" style="-fx-border-color: black;">
-         <children>
-            <Label layoutX="14.0" layoutY="6.0" text="Critério de Parada">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="txtErro" layoutX="14.0" layoutY="41.0" prefHeight="25.0" prefWidth="77.0" />
-            <TextField fx:id="txtEpocas" layoutX="112.0" layoutY="41.0" prefHeight="3.0" prefWidth="85.0" />
-            <Label layoutX="14.0" layoutY="26.0" text="Erro" />
-            <Label layoutX="112.0" layoutY="26.0" text="nº Épocas" />
-         </children>
-      </AnchorPane>
-      <AnchorPane fx:id="pnTaxaAprendazagem" layoutX="248.0" layoutY="166.0" prefHeight="81.0" prefWidth="211.0" style="-fx-border-color: black;">
-         <children>
-            <Label layoutX="17.0" layoutY="9.0" text="Taxa de Aprendizagem (N)">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="txtTaxaAprendizagem" layoutX="56.0" layoutY="41.0" prefHeight="9.0" prefWidth="85.0" />
-         </children>
-      </AnchorPane>
-      <AnchorPane fx:id="pnFuncaoAtivacao" layoutX="467.0" layoutY="166.0" prefHeight="81.0" prefWidth="275.0" style="-fx-border-color: black;">
-         <children>
-            <Label layoutX="14.0" layoutY="9.0" text="Função de Ativação">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Label>
-            <RadioButton fx:id="rdLinear" layoutX="14.0" layoutY="42.0" mnemonicParsing="false" text="Linear">
-               <toggleGroup>
-                  <ToggleGroup fx:id="grupoFuncaoAtivacao" />
-               </toggleGroup>
-            </RadioButton>
-            <RadioButton fx:id="rdLogistica" layoutX="79.0" layoutY="42.0" mnemonicParsing="false" text="Logística" toggleGroup="$grupoFuncaoAtivacao" />
-            <RadioButton fx:id="rdHiperbolica" layoutX="157.0" layoutY="42.0" mnemonicParsing="false" text="Hiperbólica" toggleGroup="$grupoFuncaoAtivacao" />
-         </children>
-      </AnchorPane>
-      <Button fx:id="btnIniciarTreino" layoutX="115.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnIniciarTreino" style="-fx-background-color: lightblue;" text="Iniciar Treino">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Button>
-      <TextArea fx:id="txtSaidas" editable="false" layoutX="26.0" layoutY="257.0" prefHeight="280.0" prefWidth="715.0">
-         <font>
-            <Font size="14.0" />
-         </font></TextArea>
-      <Button fx:id="btnTreinar" layoutX="37.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnTreinar" style="-fx-background-color: lightblue;" text="Treinar">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Button>
-      <Button fx:id="btnTestar" layoutX="234.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnTestar" style="-fx-background-color: lightgreen;" text="Testar">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Button>
-      <Button fx:id="btnIniciarTeste" layoutX="306.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnIniciarTeste" style="-fx-background-color: lightgreen;" text="Iniciar Teste">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Button>
-      <Button fx:id="btnCancelar" layoutX="417.0" layoutY="560.0" mnemonicParsing="false" onMouseClicked="#clkBtnCancelar" style="-fx-background-color: #FF6352;" text="Cancelar">
-         <font>
-            <Font name="System Bold" size="14.0" />
-         </font>
-      </Button>
-      <RadioButton fx:id="rdSim" layoutX="586.0" layoutY="88.0" mnemonicParsing="false" text="Sim">
-         <toggleGroup>
-            <ToggleGroup fx:id="grupoNormalizar" />
-         </toggleGroup>
-      </RadioButton>
-      <RadioButton fx:id="rdNao" layoutX="649.0" layoutY="89.0" mnemonicParsing="false" text="Não" toggleGroup="$grupoNormalizar" />
-   </children>
-</AnchorPane>
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="611.0" prefWidth="1030.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mlp.PrincipalController">
+  <tabs>
+    <Tab text="Treinamento">
+      <content>
+        <AnchorPane fx:id="pnTreinamento" minHeight="0.0" minWidth="0.0" prefHeight="583.0" prefWidth="996.0">
+               <children>
+                  <Label layoutX="14.0" text="Rede Neural MLP">
+                     <font>
+                        <Font name="System Bold" size="30.0" />
+                     </font>
+                  </Label>
+                  <HBox alignment="CENTER" layoutX="14.0" layoutY="52.0" prefHeight="46.0" prefWidth="982.0" spacing="20.0">
+                     <children>
+                        <AnchorPane fx:id="pnAtributos">
+                           <children>
+                              <Label layoutY="3.0" text="Nº Atributos">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtAtributos" layoutX="86.0" prefHeight="0.0" prefWidth="61.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="pnClasses">
+                           <children>
+                              <Label layoutY="3.0" text="Nº Classes">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtClasses" layoutX="70.0" prefHeight="25.0" prefWidth="61.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="pnNeuronios">
+                           <children>
+                              <Label text="Nº Neurônios Camada Oculta">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <RadioButton fx:id="rdPadrao" layoutY="22.0" mnemonicParsing="false" onMouseClicked="#clkRdPadrao" text="Padrão">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="grupoNumNeuronios" />
+                                 </toggleGroup>
+                              </RadioButton>
+                              <RadioButton fx:id="rdPersonalizado" layoutX="70.0" layoutY="22.0" mnemonicParsing="false" onMouseClicked="#clkRdPersonalizado" text="Personalizado">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="grupoNumNeuronios" />
+                                 </toggleGroup>
+                              </RadioButton>
+                              <TextField fx:id="txtQtdNeuronios" layoutX="172.0" layoutY="18.0" prefHeight="25.0" prefWidth="26.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="pnNormalizacao">
+                           <children>
+                              <Label text="Normalizar Dados?">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <RadioButton fx:id="rdSim" layoutX="9.0" layoutY="22.0" mnemonicParsing="false" text="Sim">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="grupoNormalizar" />
+                                 </toggleGroup>
+                              </RadioButton>
+                              <RadioButton fx:id="rdNao" layoutX="63.0" layoutY="22.0" mnemonicParsing="false" text="Não" toggleGroup="$grupoNormalizar" />
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </HBox>
+                  <AnchorPane fx:id="pnArquivoTreino" layoutX="14.0" layoutY="96.0" prefHeight="52.0" prefWidth="977.0">
+                     <children>
+                        <Label layoutX="119.0" layoutY="1.0" text="Selecione o arquivo" />
+                        <TextField fx:id="txtCaminhoArquivoTreino" editable="false" layoutX="119.0" layoutY="18.0" prefHeight="29.0" prefWidth="597.0" />
+                        <Button fx:id="btnProcurarArqTreino" layoutX="724.0" layoutY="16.0" mnemonicParsing="false" onMouseClicked="#clkBtnProcurarArqTreino" prefHeight="30.0" prefWidth="112.0" text="Procurar">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+                  <HBox alignment="CENTER" layoutX="14.0" layoutY="152.0" prefHeight="81.0" prefWidth="974.0" spacing="20.0">
+                     <children>
+                        <AnchorPane fx:id="pnCriterioParada" prefHeight="81.0" prefWidth="211.0" style="-fx-border-color: black;">
+                           <children>
+                              <Label layoutX="14.0" layoutY="6.0" text="Critério de Parada">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtErro" layoutX="14.0" layoutY="41.0" prefHeight="25.0" prefWidth="77.0" />
+                              <TextField fx:id="txtEpocas" layoutX="112.0" layoutY="41.0" prefHeight="3.0" prefWidth="85.0" />
+                              <Label layoutX="14.0" layoutY="26.0" text="Erro" />
+                              <Label layoutX="112.0" layoutY="26.0" text="nº Épocas" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="pnTaxaAprendazagem" prefHeight="81.0" prefWidth="211.0" style="-fx-border-color: black;">
+                           <children>
+                              <Label layoutX="17.0" layoutY="9.0" text="Taxa de Aprendizagem (N)">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="txtTaxaAprendizagem" layoutX="56.0" layoutY="41.0" prefHeight="9.0" prefWidth="85.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="pnFuncaoAtivacao" prefHeight="81.0" prefWidth="275.0" style="-fx-border-color: black;">
+                           <children>
+                              <Label layoutX="14.0" layoutY="9.0" text="Função de Ativação">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <RadioButton fx:id="rdLinear" layoutX="14.0" layoutY="42.0" mnemonicParsing="false" text="Linear">
+                                 <toggleGroup>
+                                    <ToggleGroup fx:id="grupoFuncaoAtivacao" />
+                                 </toggleGroup>
+                              </RadioButton>
+                              <RadioButton fx:id="rdLogistica" layoutX="79.0" layoutY="42.0" mnemonicParsing="false" text="Logística" toggleGroup="$grupoFuncaoAtivacao" />
+                              <RadioButton fx:id="rdHiperbolica" layoutX="157.0" layoutY="42.0" mnemonicParsing="false" text="Hiperbólica" toggleGroup="$grupoFuncaoAtivacao" />
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </HBox>
+                  <AnchorPane fx:id="pnResultadosTreinamento" layoutX="15.0" layoutY="245.0" prefHeight="325.0" prefWidth="993.0">
+                     <children>
+                        <TextArea fx:id="txtConsoleTreinamento" editable="false" prefHeight="192.0" prefWidth="397.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </TextArea>
+                        <TextArea fx:id="txtResultadosTreinamentos" editable="false" layoutY="198.0" prefHeight="113.0" prefWidth="397.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </TextArea>
+                        <StackedAreaChart fx:id="graficoTreinamento" layoutX="402.0" layoutY="2.0" prefHeight="323.0" prefWidth="587.0" verticalGridLinesVisible="false">
+                          <xAxis>
+                            <NumberAxis side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                            <NumberAxis side="LEFT" />
+                          </yAxis>
+                        </StackedAreaChart>
+                     </children>
+                  </AnchorPane>
+                  <HBox layoutX="350.0" layoutY="7.0" spacing="20.0">
+                     <children>
+                        <Button fx:id="btnTreinar" mnemonicParsing="false" onMouseClicked="#clkBtnTreinar" style="-fx-background-color: lightblue;" text="Treinar">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btnIniciarTreino" mnemonicParsing="false" onMouseClicked="#clkBtnIniciarTreino" style="-fx-background-color: lightblue;" text="Iniciar Treino">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btnCancelarTreinamento" mnemonicParsing="false" onMouseClicked="#clkBtnCancelarTreinamento" style="-fx-background-color: #FF6352;" text="Cancelar">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Teste">
+      <content>
+        <AnchorPane fx:id="pnTeste" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Label layoutX="14.0" text="Rede Neural MLP">
+                     <font>
+                        <Font name="System Bold" size="30.0" />
+                     </font>
+                  </Label>
+                  <AnchorPane fx:id="pnArquivoTeste" layoutX="14.0" layoutY="45.0" prefHeight="63.0" prefWidth="734.0">
+                     <children>
+                        <Label layoutY="1.0" text="Selecione o arquivo" />
+                        <TextField fx:id="txtCaminhoArquivoTeste" editable="false" layoutY="22.0" prefHeight="29.0" prefWidth="597.0" />
+                        <Button fx:id="btnProcurarArqTeste" layoutX="605.0" layoutY="20.0" mnemonicParsing="false" onMouseClicked="#clkBtnProcurarArqTeste" prefHeight="30.0" prefWidth="112.0" text="Procurar">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </AnchorPane>
+                  <HBox layoutX="370.0" layoutY="14.0" spacing="20.0">
+                     <children>
+                        <Button fx:id="btnTestar" mnemonicParsing="false" onMouseClicked="#clkBtnTestar" style="-fx-background-color: lightgreen;" text="Testar">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btnIniciarTeste" mnemonicParsing="false" onMouseClicked="#clkBtnIniciarTeste" style="-fx-background-color: lightgreen;" text="Iniciar Teste">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="btnCancelarTeste" mnemonicParsing="false" onMouseClicked="#clkBtnCancelarTeste" style="-fx-background-color: #FF6352;" text="Cancelar">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>
