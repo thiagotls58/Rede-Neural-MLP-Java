@@ -169,7 +169,7 @@
                               <Font size="14.0" />
                            </font>
                         </TextArea>
-                        <LineChart fx:id="graficoTreinamento" horizontalGridLinesVisible="false" layoutX="397.0" prefHeight="314.0" prefWidth="596.0" verticalGridLinesVisible="false">
+                        <LineChart fx:id="graficoTreinamento" createSymbols="false" horizontalGridLinesVisible="false" layoutX="397.0" prefHeight="314.0" prefWidth="596.0" style="-fx-border-color: black;" stylesheets="@estilo.css" verticalGridLinesVisible="false">
                           <xAxis>
                             <NumberAxis label="Época" side="BOTTOM" />
                           </xAxis>
